@@ -1,0 +1,247 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum WorkspacePlan {
+  FREE
+  PRO
+  TEAM
+  ENTERPRISE
+}
+
+enum WorkspaceStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum WorkspaceType {
+  PERSONAL
+  TEAM
+}
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String
+
+  // ===== PROFILE =====
+  name         String?
+  avatar       String?
+
+  // ===== ACCESS CONTROL =====
+  role         UserRole   @default(USER)
+  status       UserStatus @default(ACTIVE)
+
+  // ===== TIMESTAMPS =====
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  // ===== RELATIONS =====
+  refreshTokens RefreshToken[]
+  apiKeys       ApiKey[]
+
+  ownedWorkspaces   Workspace[]        @relation("WorkspaceOwner")
+  workspaceMembers  WorkspaceMember[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+  userId      String
+  tokenHash   String   @unique
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  replacedBy  String?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([tokenHash])
+}
+
+model ApiKey {
+  id        String   @id @default(uuid())
+  userId    String
+  name      String
+  keyHash   String
+
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([keyHash])
+}
+
+model Workspace {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+
+  ownerId   String
+  owner     User     @relation("WorkspaceOwner",fields: [ownerId], references: [id])
+
+  plan      WorkspacePlan @default(FREE)
+  status    WorkspaceStatus @default(ACTIVE)
+
+  type      WorkspaceType @default(PERSONAL)
+  members   WorkspaceMember[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WorkspaceMember {
+  id          String   @id @default(uuid())
+  workspaceId String
+  userId      String
+
+  role        WorkspaceRole @default(MEMBER)
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  joinedAt    DateTime  @default(now())
+
+  @@unique([workspaceId, userId])
+}
+
+// ============= Document module ===============
+
+enum DocumentStatus {
+  UPLOADED     // file vừa upload xong
+  PROCESSING   // knowledge module đang xử lý
+  READY        // đã parse + embed xong
+  FAILED       // xử lý lỗi
+  DELETED      // soft delete
+}
+
+enum StorageProvider {
+  LOCAL
+  S3
+  R2
+}
+
+enum DocStep {
+  PARSE 
+  CHUNK 
+  EMBED
+}
+
+model DocumentFile {
+  id              String   @id @default(uuid())
+
+  // ===== Multi-tenant =====
+  workspaceId     String
+  ownerId         String
+
+  // ===== Versioning =====
+  version         Int      @default(1)
+  parentId        String?  // document gốc
+  isLatest        Boolean  @default(true)
+
+  // ===== File metadata =====
+  originalName    String
+  storedName      String
+  extension       String?
+  mimeType        String
+  size            BigInt
+  checksum        String?   // SHA256 / MD5
+  pageCount       Int?
+  language        String?
+
+  // ===== Classification =====
+  category        String?
+  tags            String[]  // Postgres array
+
+  // ===== Storage =====
+  storageProvider StorageProvider
+  storagePath     String
+
+  // ===== Processing =====
+  status          DocumentStatus @default(UPLOADED)
+  errorMessage    String?
+  chunkCount      Int?
+  indexedAt       DateTime?
+
+  // ===== Audit =====
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+
+  // ===== Relations =====
+  parent          DocumentFile? @relation("DocumentVersion", fields: [parentId], references: [id])
+  versions        DocumentFile[] @relation("DocumentVersion")
+
+  @@index([workspaceId])
+  @@index([ownerId])
+  @@index([status])
+  @@index([checksum])
+  @@index([createdAt])
+}
+
+enum DocumentRole {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
+model DocumentPermission {
+  id          String   @id @default(uuid())
+  documentId  String
+  userId      String
+  role        DocumentRole
+
+  createdAt   DateTime @default(now())
+
+  @@unique([documentId, userId])
+  @@index([documentId])
+}
+
+model DocumentProcessingLog {
+  id          String   @id @default(uuid())
+  documentId  String
+  step        DocStep
+  status      String      // STARTED | SUCCESS | FAILED
+  message     String?
+  createdAt   DateTime @default(now())
+
+  @@index([documentId])
+  @@index([step])
+}
+
+// =============================================
+

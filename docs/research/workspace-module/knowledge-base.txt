@@ -1,0 +1,197 @@
+				DESIGN KNOWLEDGE MODULE
+1. Knowledge Base:
+- 90–95% chất lượng KHÔNG đến từ model AI. 
+Nó đến từ dữ liệu đầu vào sạch, đúng cấu trúc, đúng ngữ nghĩa
+- Không có pipeline “hoàn hảo” cho mọi loại document.
+Chỉ có pipeline đủ tốt cho 80% case phổ biến, và xử lý gracefully 20% còn lại
+- Chi phí lớn nhất không phải GPU, mà là sai kiến trúc
+(parse sai → chunk sai → vector sai → AI trả lời tào lao)
+
+=> Thiết kế pipeline quan trọng hơn chọn model.
+
+2. Workload
+=> Knowledge module have 3 workload, don't put in one stack
+	2.1 Phân loại workload trong knowledge module:
+| Loại                    | Bản chất        | Đặc điểm               |
+| ----------------------- | --------------- | ---------------------- |
+| Control / Orchestration | Logic nghiệp vụ | I/O, event             |
+| Document Parsing        | ML + NLP        | CPU nặng, lib phức tạp |
+| Embedding / AI          | ML compute      | GPU / batch            |
+
+	2.2 Production-grade:
+=> Rule: Dùng ngôn ngữ theo hệ sinh thái mạnh nhất
+| Phần          | Khuyến nghị             | Lý do                  |
+| ------------- | ----------------------- | ---------------------- |
+| Orchestration | **TypeScript (NestJS)** | Logic rõ, maintain tốt |
+| Parsing sâu   | **Python**              | Thư viện vượt trội     |
+| Embedding     | Python (hoặc API)       | Batch, GPU             |
+
+=> Không phải microservice, mà là compute worker
+
+3. Đâu là ranh giới giữa hệ thống điều phối và hệ thống xử lý nặng?
+	3.1 Boundary Knowledge Module:
+		[NestJS API]
+		   |
+		   |  (event / job)
+		      ↓
+		[Knowledge Orchestrator]
+		   |
+		   |  (task)
+		      ↓
+		[Processing Worker (Python)]
+		
+- NestJS:
+	+ nhận document event
+	+ quản lý trạng thái
+	+ retry, tracking
+- Python worker:
+	+ parse
+	+ clean
+	+ chunk
+	+ embed
+=> Worker có thể chạy cùng server lúc đầu, sau này tách vẫn được
+
+4. Design Pipeline:
+	4.1 Standard pipeline: 
+	Step 1. Load file
+	Step 2. Parse (structure-aware)
+	Step 3. Normalize & Clean
+	Step 4. Structural segmentation
+	Step 5. Semantic chunking
+	Step 6. Embedding
+	Step 7. Storage + metadata
+	
+	4.2 Improve pipeline: 
+		A. Chiến lược "Small-to-Big" (Parent Document Retrieval)
+Thay vì chỉ lưu một loại chunk, hãy cân nhắc lưu trữ theo cặp:
+- Child Chunk (Nhỏ): Dùng để embedding (giúp tìm kiếm chính xác ngữ nghĩa).
+- Parent Chunk (Lớn/Nguyên bản): Dùng để cung cấp ngữ cảnh cho AI khi trả lời.
+=> Chunk nhỏ giúp tìm đúng chỗ, nhưng chunk lớn mới giúp AI hiểu đủ ý.
+		B. Xử lý Table (Bảng biểu) - "Tử huyệt" của RAG
+** Việc "Preserve table as text" là chưa đủ.
+- Bổ sung: Nên chuyển Table sang định dạng Markdown hoặc HTML.
+- Tại sao: LLM hiểu cấu trúc Markdown cực tốt. Nếu bảng quá lớn, hãy sinh một bản Summary cho Table đó và embed bản summary này cùng với bảng.
+		C. Cơ chế Kiểm soát Phiên bản (Version Control & Sync)
+** Chưa đề cập đến việc: "Nếu Document A bị sửa hoặc xóa thì sao?"
+- Bổ sung: Cần cơ chế Upsert dựa trên Hash content.
+- Logic: Trước khi xử lý, hash file content. Nếu hash đã tồn tại -> bỏ qua. Nếu file bị xóa trên hệ thống -> phải xóa toàn bộ vector liên quan trong VectorDB.
+
+		D. Nâng cấp Retrieval (Hậu xử lý)
+** Chất lượng không chỉ dừng ở lúc Store, mà còn ở lúc Retrieve.
+- Hybrid Search: Bắt buộc kết hợp Vector Search (Semantic) + Full-text Search (Keyword - như BM25).
+- Re-ranking: Sau khi lấy ra top 10-20 kết quả, hãy dùng một model Cross-Encoder (Reranker) để sắp xếp lại. Đây là bước quan trọng nhất để tăng độ chính xác từ 80% lên 95%.
+	
+	4.3 Checlist technical: 
+- Sử dụng Redis Queue (BullMQ) giữa NestJS và Python Worker để chịu tải khi upload hàng nghìn file cùng lúc.
+- Nên thêm bước Visual Debugging: Xuất ra file Markdown sau khi parse để kiểm tra xem Docling có "nuốt" mất chữ nào không.
+- Nếu dùng OpenAI Embedding: Hãy dùng late interaction hoặc caching. Nếu tự host: Dùng Tei (Text Embeddings Inference) của HuggingFace để tăng throughput gấp 10 lần.
+- Ngoài page, section, hãy thêm summary_of_document vào mỗi chunk để AI không bị lạc hướng khi trả lời các câu hỏi mang tính tổng quát.
+
+5. Parsing (tech heavy):
+	5.1 What is parse ?
+- Parse is pdf -> logical structure
+- Example: 
+	* heading
+	* paragraph
+	* table
+	* list 
+	* caption
+	* footnote
+	
+	5.2 Doc & Research:
+Vì:
+- 1 PDF khoa học ≠ 1 PDF hợp đồng ≠ 1 slide
+- Layout ảnh hưởng trực tiếp đến chunking
+- Chunking ảnh hưởng trực tiếp đến retrieval
+
+	5.3 Open-source (Production):
+
+- Core: 
+	* Docling → layout-aware parsing (PDF/DOCX)
+	* pdfplumber → fallback low-level
+	* mammoth → DOCX text logic
+	* unstructured.io → rule-based segmentation (chọn lọc)
+- OCR: 
+	* PaddleOCR
+=> only need 1 core + 1 fallback
+
+6. Clean & Normalize: nơi quyết định “AI hiểu đúng hay không”
+Những thứ BẮT BUỘC phải làm: 
+	- Remove header/footer lặp
+	- Merge broken lines
+	- Normalize unicode
+	- Remove noise (page number, watermark)
+	- Preserve table as text (không flatten bừa)
+=> Đây là engineering thuần, không phải AI
+
+7. Chunking: Intelligence of system
+** Embedding model good + chunk dump = system dump ** 
+	7.1 Chunk KHÔNG theo token thuần
+- Chunk đúng phải:
+	* Tôn trọng structure
+	* Không cắt giữa ý
+	* Có metadata đầy đủ
+	
+	7.2 Metadata:
+- Metadata helps:
+	* Filter retrieval
+	* Explain answer
+	* Debug AI
+	
+- Example:
+	* section title
+	* page
+	* documentId
+	* chunk index
+
+8. Embedding & chi phí CPU/GPU (rất thực tế)
+** Gold Rule: Không embed lại thứ đã embed
+
+Chiến lược tiết kiệm tài nguyên: 
+	+ Deduplicate chunk (hash content)
+	+ Batch embedding
+	+ Async embedding
+	+ Low priority background job
+=> GPU ít → batch lớn
+=> CPU ít → queue chậm nhưng ổn định
+
+9. Thiết kế cho hiệu năng với phần cứng hạn chế
+	9.1 Tối ưu KHÔNG nằm ở model:
+- Nằm ở:
+	* Batch size
+	* Pipeline async
+	* Cache intermediate result
+	* Không làm lại việc cũ
+
+	9.2 Nguyên tắc thực tế:
+- Parse = CPU-bound → scale theo core
+- Embed = GPU-bound → batch lớn
+- Retrieval = RAM-bound → index gọn
+
+10. Làm sao đạt 90–95% chất lượng?
+- Không có magic. Chỉ có ** kỷ luật kỹ thuật **.
+- Checklist chất lượng:
+	+ Parser giữ được heading & table
+	+ Clean không phá cấu trúc
+	+ Chunk theo section
+	+ Metadata đầy đủ
+	+ Embedding consistent
+	+ Retrieval test bằng query thật
+	+ Manual evaluation 50–100 câu hỏi
+=> Không test = không biết chất lượng
+- Thiết lập:
+	+ Golden Dataset: Một bộ câu hỏi và câu trả lời mẫu (khoảng 50 câu). Mỗi khi bạn thay đổi logic chunking hoặc model, hãy chạy lại để xem điểm số (RAGAS score) tăng hay giảm.
+	+ Dead Letter Queue (DLQ): Với 20% case "không hoàn hảo", Python worker phải đẩy vào DLQ để kỹ sư kiểm tra thủ công tại sao parse lỗi (ví dụ file bị pass hoặc scan quá mờ).
+	+ Latex Support: Nếu document có công thức toán học, hãy đảm bảo parser output ra được định dạng $LaTeX$ để AI không đọc nhầm ký tự đặc biệt.
+
+11. Tài liệu & kiến thức:
+- Parsing & RAG:
+	+ Docling documentation
+	+ Unstructured.io design docs
+	+ LlamaIndex parsing & chunking guides
+	+ “RAG Failure Modes” (search keyword)
+
+- System design:
+	- “Modular Monolith”
+	- “Event-driven ingestion pipeline”
+	- “Batch processing vs streaming”

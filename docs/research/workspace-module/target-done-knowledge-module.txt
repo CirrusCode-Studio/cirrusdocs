@@ -1,0 +1,49 @@
+				ACHIEVE KNOWLEDGE MODULE
+
+1. Quality Done (Chất lượng đầu ra)
+Đây là phần quan trọng nhất để đạt mục tiêu 90–95% chất lượng.
+
+Retrieval Hit Rate > 90%: Khi đặt 100 câu hỏi từ bộ "Golden Dataset", ít nhất 90 câu phải lấy được đúng chunk chứa câu trả lời trong Top-5 kết quả.
+
+Table Integrity: 100% các bảng biểu trong Document mẫu phải được chuyển đổi sang Markdown/HTML mà không bị mất cột hoặc xô lệch hàng.
+
+Contextual Chunking: Mỗi chunk lưu trong VectorDB bắt buộc phải có breadcrumb (Ví dụ: Chính sách bảo hành > Mục 2.1 > Phí sửa chữa) để tránh mất ngữ cảnh.
+
+No Hallucination (Grounding): AI chỉ được trả lời dựa trên chunk lấy ra. Nếu không có thông tin, hệ thống phải trả về "Tôi không biết".
+
+2. Technical Done (Kỹ thuật & Pipeline)
+Module được coi là hoàn thiện về mặt kỹ thuật khi thỏa mãn Checklist sau:
+
+Idempotency (Tính bù trừ): Upload cùng một file 2 lần không tạo ra vector trùng lặp (dựa trên Content Hash).
+
+State Machine hoàn chỉnh: Mọi file đều phải nằm ở 1 trong 4 trạng thái rõ ràng: PENDING, PROCESSING, COMPLETED, FAILED.
+
+Auto-Cleaning: Tự động loại bỏ Header/Footer, số trang và các ký tự nhiễu Unicode trước khi embedding.
+
+Metadata Enrichment: Mọi vector phải đi kèm metadata tối thiểu: file_id, page_number, chunk_index, timestamp, và document_type.
+
+3. Operational Done (Vận hành & Ổn định)
+Hệ thống phải "sống" được trong môi trường thực tế:
+
+Error Handling (DLQ): 100% các file lỗi (do mật khẩu, file hỏng, hoặc OCR lỗi) phải được đẩy vào một hàng đợi riêng (Dead Letter Queue) kèm mã lỗi chi tiết.
+
+Latency Benchmark: * Parsing & Chunking: < 10 giây cho file PDF 20 trang.
+
+Retrieval: < 200ms cho một truy vấn tìm kiếm vector.
+
+Logging & Tracing: Phải truy vết được từ một câu trả lời của AI ngược lại là do những chunk_id nào tạo ra và thuộc file nào.
+
+4. Evaluation Done (Kiểm chứng cuối cùng)
+Bạn không thể nói module "Done" nếu chưa bước qua giai đoạn Manual Evaluation:
+
+Xây dựng Golden Dataset: 50-100 cặp Câu hỏi - Câu trả lời (Ground Truth) dựa trên dữ liệu thật của bạn.
+
+Chạy Benchmark tự động: Sử dụng các framework như RAGAS hoặc đơn giản là dùng LLM mạnh (GPT-4o) để chấm điểm kết quả của module theo 3 chỉ số:
+
+Faithfulness: Câu trả lời có trung thực với tài liệu không?
+
+Answer Relevance: Câu trả lời có đúng trọng tâm câu hỏi không?
+
+Context Precision: Các chunk lấy ra có thực sự liên quan không?
+
+Công thức Done: Done = (Feature Complete) + (Golden Dataset Passed) + (Stability Confirmed)

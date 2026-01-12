@@ -1,0 +1,74 @@
+				SYSTEM DESIGN DEEP DIVE
+
+1. Step 1 -- Define DONE
+- When knowledge module is done ?
+=> Với 100 tài liệu phổ biến (PDF, DOCX, hợp đồng, tài liệu kỹ thuật),
+hệ thống trả lời đúng, có nguồn, không hallucinate nặng, trong 90–95% câu hỏi thông thường của người dùng.
+
+2. Step 2 -- Phân loại DOCUMENT
+	2.1 Tạo một bản phân loại
+=> Mỗi loại document -> parse & chunk khác nhau.
+	2.2 Why this step: 
+- Giúp không thiết kế pipeline mù
+- Biết loại nào support trước
+- Biết loại nào “best effort”
+
+3. Step 3 -- Design DATA CONTRACT
+	3.1 Parsed Output Contract ?
+	3.2 Cleaned Document Contract ?
+	3.3 Chunk Contract ? 
+	3.4 Vector Contract ?
+	
+4. Step 4 -- Pipeline design in stages
+	[Document Uploaded]
+		↓
+	[Ingestion]
+		↓
+	[Parse]
+		↓
+	[Normalize / Clean]
+		↓
+	[Structure Segmentation]
+		↓
+	[Semantic Chunking]
+		↓
+	[Embedding]
+		↓
+	[Vector Storage]
+** Each stage must answer 3 question: 
+	+ What is input ? 
+	+ What is output ? 
+	+ What happens when error ocurr ?
+	
+5. Step 5 -- Thiết kế FAILURE & RETRY
+	5.1 Defined: 
+- File lỗi → trạng thái gì?
+- Parse fail → retry hay bỏ?
+- OCR fail → fallback?
+- Embed fail → delay?
+
+6. Step 6 -- Thiết kế QUALITY EVALUATION
+	6.1. What need to do:
+- Tạo bộ câu hỏi thật
+- Query qua retrieval
+- So answer với ground truth
+- Không cần fancy tool.
+	6.2. Chỉ số cần quan tâm
+- Retrieval hit rate
+- Chunk relevance
+- Answer faithfulness
+
+7. Step 7 -- Trình tự xây dựng thực tế
+- Tuần 1
+	+ Document classification
+	+ Pipeline design
+	+ Data contract
+- Tuần 2
+	+ Parser POC (1 loại document)
+	+ Manual evaluate output
+- Tuần 3
+	+ Chunking strategy
+	+ Retrieval test
+- Tuần 4
+	+ Embedding & vector store
+	+ End-to-end test

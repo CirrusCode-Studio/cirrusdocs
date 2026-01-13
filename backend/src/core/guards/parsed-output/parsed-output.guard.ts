@@ -1,4 +1,4 @@
-import { ParsedDocument } from './parsed-output.types';
+import { ParsedDocument } from '../../contracts/parsed-output/parsed-output.types';
 
 /**
  * Guard decision result

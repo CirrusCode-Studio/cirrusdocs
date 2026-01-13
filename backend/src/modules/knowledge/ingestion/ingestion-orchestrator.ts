@@ -1,8 +1,12 @@
+import { StepRunner } from './step-runner';
 import { IngestionResult } from "@/core/contracts/ingestion/ingestion-result.contract";
 import { IngestionContext } from "./ingestion-context";
 import { ExecutionPlan } from "./excution-plan";
 
 export class IngestionOrchestrator {
+    
+    constructor(private readonly stepRunner: StepRunner){}
+
     async ingest(context: IngestionContext): Promise<IngestionResult> {
         const plan = this.buildExecutionPlan(context);
 
@@ -100,6 +104,6 @@ export class IngestionOrchestrator {
     ): Promise<void> {
         // Placeholder
         // Sau này map handler -> concrete implementation
-        return;
+        await this.stepRunner.run(handler, context);
     }
 }

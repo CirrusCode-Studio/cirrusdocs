@@ -1,9 +1,15 @@
+import { StepRunner } from './step-runner';
 import { IngestionResult } from "@/core/contracts/ingestion/ingestion-result.contract";
 import { IngestionContext } from "./ingestion-context";
 import { ExecutionPlan } from "./excution-plan";
+import { IngestionExecution } from './ingestion-execution';
 
 export class IngestionOrchestrator {
+    
+    constructor(private readonly stepRunner: StepRunner){}
+
     async ingest(context: IngestionContext): Promise<IngestionResult> {
+        const execution = new IngestionExecution(context);
         const plan = this.buildExecutionPlan(context);
 
         const executedSteps: string[] = [];
@@ -11,7 +17,7 @@ export class IngestionOrchestrator {
 
         for (const step of plan.steps) {
             try {
-                await this.executeStep(step.handler, context);
+                await this.executeStep(step.handler, execution);
 
                 executedSteps.push(step.step);
             } catch (err) {
@@ -20,7 +26,7 @@ export class IngestionOrchestrator {
                         `Step ${step.step} failed. Fallback to ${step.fallback}`,
                     );
 
-                    await this.executeStep(step.fallback, context);
+                    await this.executeStep(step.fallback, execution);
                     executedSteps.push(`${step.step}:fallback`);
                 } else if (step.required && plan.errorPolicy.failFast) {
                     return {
@@ -96,10 +102,10 @@ export class IngestionOrchestrator {
 
     private async executeStep(
         handler: string,
-        context: IngestionContext,
+        execution: IngestionExecution,
     ): Promise<void> {
         // Placeholder
         // Sau này map handler -> concrete implementation
-        return;
+        await this.stepRunner.run(handler, execution);
     }
 }

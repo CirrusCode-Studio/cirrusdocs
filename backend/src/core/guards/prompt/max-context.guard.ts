@@ -1,4 +1,4 @@
-import { PromptContext } from "@/core/contracts/prompt/prompt-context.contract";
+import { PromptContext } from "@/core/contracts/prompts/prompt-context.contract";
 
 export class MaxContextGuard {
     static enforce(ctx: PromptContext, maxChunks = 8): void {

@@ -1,5 +1,5 @@
 import { RetrievalResult } from '../retrievals/retrieval-result.contract';
-import { Answer } from '../prompt/answer.contract';
+import { Answer } from '../prompts/answer.contract';
 
 export interface EvaluationInput {
     query: string;

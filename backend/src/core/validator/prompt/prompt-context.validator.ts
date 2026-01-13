@@ -1,4 +1,4 @@
-import { PromptContext } from '@/core/contracts/prompt/prompt-context.contract';
+import { PromptContext } from '@/core/contracts/prompts/prompt-context.contract';
 
 export class PromptContextValidator {
     static validate(ctx: PromptContext): void {

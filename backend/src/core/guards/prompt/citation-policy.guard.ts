@@ -1,4 +1,4 @@
-import { Answer } from '@/core/contracts/prompt/answer.contract';
+import { Answer } from '@/core/contracts/prompts/answer.contract';
 
 export class CitationPolicyGuard {
     static enforce(answer: Answer): void {

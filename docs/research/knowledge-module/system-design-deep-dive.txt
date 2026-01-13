@@ -17,7 +17,9 @@ hệ thống trả lời đúng, có nguồn, không hallucinate nặng, trong 9
 	3.1 Parsed Output Contract ?
 	3.2 Cleaned Document Contract ?
 	3.3 Chunk Contract ? 
-	3.4 Vector Contract ?
+	3.4 Embedding Contract ?
+	3.5 Prompt Answer Contract ?
+	3.6 Evolution Contract ?
 	
 4. Step 4 -- Pipeline design in stages
 	[Document Uploaded]

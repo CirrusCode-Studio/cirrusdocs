@@ -1,0 +1,171 @@
+
+CIRRUSDOCS AI – CORE KNOWLEDGE MODULE (PRODUCTION SUMMARY)
+
+Mục tiêu:
+Xây dựng Knowledge Module đạt độ chính xác 90–95%, dùng thật trong production, kiểm soát hallucination, tối ưu chi phí CPU/GPU.
+
+========================
+PIPELINE TỔNG THỂ
+========================
+1. Document Ingestion
+2. Document Classification
+3. Parsed Output Contract
+4. Chunking Strategy
+5. Embedding + Vector Storage
+6. Indexing
+7. Retrieval Strategy
+8. Answer Generation & Citation Enforcement
+
+========================
+1. DOCUMENT INGESTION
+========================
+- Upload file
+- Store file vật lý (cloud)
+- Store metadata (document_id, workspace_id, version, status)
+- Không xử lý nặng ở bước này
+
+========================
+2. DOCUMENT CLASSIFICATION
+========================
+Mục tiêu: xác định cách parse & xử lý.
+
+Phân loại theo:
+- File type: PDF, DOCX, TXT, HTML
+- Scan vs Digital
+- Language
+- Structure level (simple / complex)
+
+Output:
+- document_type
+- parse_strategy
+- ocr_required (true/false)
+
+========================
+3. PARSED OUTPUT CONTRACT
+========================
+Mục tiêu: chuẩn hóa output parse cho mọi downstream step.
+
+Parsed Document Object gồm:
+- document metadata
+- pages[]
+- sections[]
+- blocks[]
+
+Mỗi block:
+- id
+- type (paragraph, table, list)
+- text
+- page_start / page_end
+- section_path
+- confidence
+
+Nguyên tắc:
+- Không mất thông tin
+- Có trace về nguồn gốc
+
+========================
+4. CHUNKING STRATEGY
+========================
+Mục tiêu: chia nhỏ để embedding nhưng giữ ngữ nghĩa.
+
+Nguyên tắc:
+- Chunk theo section trước, không cắt bừa
+- Size ~300–600 tokens
+- Overlap nhẹ (10–15%)
+- Gắn metadata đầy đủ
+
+Chunk object:
+- chunk_id
+- document_id
+- text
+- section
+- page_range
+- chunk_index
+
+========================
+5. EMBEDDING & VECTOR STORAGE
+========================
+Mục tiêu: biến text thành semantic representation.
+
+Nguyên tắc:
+- Background worker
+- Batch embedding
+- Version hóa embedding
+
+Embedding output:
+- vector
+- dim
+- model
+- embedding_version
+
+Vector store đề xuất:
+- Qdrant
+
+Metadata bắt buộc:
+- workspace_id
+- document_id
+- section
+- embedding_version
+
+========================
+6. INDEXING
+========================
+Mục tiêu: search nhanh, chính xác, ổn định.
+
+- HNSW index
+- Filter trước search
+- Soft delete trước, cleanup sau
+- Idempotent insert (hash content)
+
+Lifecycle chunk:
+PENDING → EMBEDDED → INDEXED
+
+========================
+7. RETRIEVAL STRATEGY
+========================
+Mục tiêu: lấy đúng context cho câu hỏi.
+
+Pipeline:
+- Query understanding
+- Query planning
+- Hybrid retrieval (semantic + keyword)
+- Filtering & scoping
+- Re-ranking
+- Context assembly
+
+Nguyên tắc:
+- Hybrid > semantic-only
+- Không top_k cố định
+- Có threshold chống hallucination
+
+========================
+8. ANSWER GENERATION & CITATION
+========================
+Mục tiêu: AI chỉ nói điều có bằng chứng.
+
+Nguyên tắc:
+- Chỉ dùng context được cấp
+- Bắt buộc citation
+- Không đủ thông tin → nói không biết
+- Validate output sau LLM
+
+Answer phải:
+- Có cấu trúc
+- Có nguồn (document, section, page)
+- Không suy diễn
+
+========================
+NGUYÊN TẮC SỐNG CÒN
+========================
+- Retrieval quan trọng hơn embedding
+- Metadata quan trọng ngang vector
+- Ít context nhưng đúng > nhiều nhưng loạn
+- Không citation = không trả lời
+- Version hóa mọi thứ (document, embedding, index)
+
+========================
+KẾT LUẬN
+========================
+Knowledge Module là não của CirrusDocs AI.
+Làm đúng → AI đáng tin, dùng được trong doanh nghiệp.
+Làm ẩu → AI nói hay nhưng sai, không dùng thật được.

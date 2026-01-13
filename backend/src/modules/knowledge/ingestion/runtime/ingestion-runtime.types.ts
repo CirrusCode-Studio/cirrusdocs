@@ -28,5 +28,6 @@ export interface RuntimeAuditState {
     stepLogs: {
         step: string;
         timestamp: number;
+        error?: string | undefined;
     }[];
 }

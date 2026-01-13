@@ -1,4 +1,5 @@
 import { IngestionContext } from "./ingestion-context";
+import { IngestionExecution } from "./ingestion-execution";
 import { PipelineRegistry } from "./pipeline-registry";
 
 export class StepRunner {
@@ -6,9 +7,9 @@ export class StepRunner {
 
     async run(
         handlerName: string,
-        context: IngestionContext,
+        execution: IngestionExecution,
     ): Promise<void> {
         const handler = this.registry.get(handlerName);
-        await handler.execute(context);
+        await handler.execute(execution);
     }
 }

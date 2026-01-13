@@ -1,9 +1,9 @@
-import { IngestionContext } from "@/modules/knowledge/ingestion/ingestion-context";
+import { IngestionExecution } from "@/modules/knowledge/ingestion/ingestion-execution";
 
 export interface StepHandler {
     /** Identification */
     readonly name: string;
 
     /** Execute step */
-    execute(context: IngestionContext): Promise<void>;
+    execute(context: IngestionExecution): Promise<void>;
 }

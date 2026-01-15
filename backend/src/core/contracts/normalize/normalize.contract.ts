@@ -1,13 +1,13 @@
-import { ParsedDocument } from "../parsed-output";
+import { CanonicalParsedDocument } from "../parsed-output";
 
 export interface NormalizeInput {
-    parsed_document: ParsedDocument;
+    parsed_document: CanonicalParsedDocument;
 
     options?: NormalizeOptions;
 }
 
 export interface NormalizeOutput {
-    normalized_document: ParsedDocument;
+    normalized_document: CanonicalParsedDocument;
 
     normalize_report: NormalizeReport;
 }

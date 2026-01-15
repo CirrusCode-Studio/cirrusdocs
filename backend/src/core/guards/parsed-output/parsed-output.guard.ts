@@ -1,4 +1,4 @@
-import { ParsedDocument } from '../../contracts/parsed-output/parsed-output.types';
+import { CanonicalParsedDocument } from '../../contracts/parsed-output/parsed-output.types';
 
 /**
  * Guard decision result
@@ -14,7 +14,7 @@ export type ParsedOutputDecision =
  * Called AFTER validateParsedOutput()
  */
 export function guardParsedOutput(
-  doc: ParsedDocument
+  doc: CanonicalParsedDocument
 ): ParsedOutputDecision {
     // 1️⃣ Hard reject conditions
     const hardReject = checkHardReject(doc);
@@ -37,7 +37,7 @@ export function guardParsedOutput(
  * ============================================================
  */
 
-function checkHardReject(doc: ParsedDocument): ParsedOutputDecision | null {
+function checkHardReject(doc: CanonicalParsedDocument): ParsedOutputDecision | null {
     const d = doc.parse_diagnostics;
 
     if (d.overall_confidence < 0.25) {
@@ -69,7 +69,7 @@ function checkHardReject(doc: ParsedDocument): ParsedOutputDecision | null {
  * ============================================================
  */
 
-function checkOCRFallback(doc: ParsedDocument): ParsedOutputDecision | null {
+function checkOCRFallback(doc: CanonicalParsedDocument): ParsedOutputDecision | null {
 	const d = doc.parse_diagnostics;
 
 	if (!d.ocr_used && d.text_coverage.detected_ratio < 0.7) {
@@ -87,7 +87,7 @@ function checkOCRFallback(doc: ParsedDocument): ParsedOutputDecision | null {
  * ============================================================
  */
 
-function checkReparse(doc: ParsedDocument): ParsedOutputDecision | null {
+function checkReparse(doc: CanonicalParsedDocument): ParsedOutputDecision | null {
 	const d = doc.parse_diagnostics;
 
 	// layout too complex for current parser

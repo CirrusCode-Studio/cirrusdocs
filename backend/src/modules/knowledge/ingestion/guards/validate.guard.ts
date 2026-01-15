@@ -6,10 +6,10 @@ export class ValidateParsedOutputGuard implements RuntimeGuard {
     readonly step = 'validate';
 
     check(execution: IngestionExecution): GuardResult {
-        if (!execution.runtime.parsing.parsedDocument) {
+        if (!execution.runtime.parsing.CanonicalParsedDocument) {
             return {
                 allowed: false,
-                reason: 'ParsedDocument missing',
+                reason: 'CanonicalParsedDocument missing',
                 severity: 'error',
             }
         }

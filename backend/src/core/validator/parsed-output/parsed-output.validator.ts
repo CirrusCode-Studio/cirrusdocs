@@ -1,5 +1,5 @@
 import {
-	ParsedDocument,
+	CanonicalParsedDocument,
 	Page,
 	Block,
 	BlockType,
@@ -18,7 +18,7 @@ export class ParsedOutputValidationError extends Error {
 /**
  * Entry point
  */
-export const validateParsedOutput = (doc: ParsedDocument): void => {
+export const validateParsedOutput = (doc: CanonicalParsedDocument): void => {
 	validateRoot(doc);
 	validatePages(doc.pages);
 	validateDiagnostics(doc);
@@ -29,7 +29,7 @@ export const validateParsedOutput = (doc: ParsedDocument): void => {
  * ============================================================
  */
 
-const validateRoot = (doc: ParsedDocument) => {
+const validateRoot = (doc: CanonicalParsedDocument) => {
 	if (!doc) {
 		throw new ParsedOutputValidationError('Document is null or undefined');
 	}
@@ -189,12 +189,12 @@ function validateBlockType(type: BlockType, blockId: string) {
 }
 
 function validateLogicalStructure(block: Block) {
-	const { logical_structure } = block;
+	const { logical } = block;
 
 	if (block.block_type === 'heading') {
 		if (
-		typeof logical_structure?.heading_level !== 'number' ||
-		logical_structure.heading_level < 1
+		typeof logical?.heading_level !== 'number' ||
+		logical.heading_level < 1
 		) {
 		throw new ParsedOutputValidationError(
 			`Heading block ${block.block_id} must have valid heading_level`
@@ -203,7 +203,7 @@ function validateLogicalStructure(block: Block) {
 	}
 
 	if (block.block_type === 'unknown') {
-		if (!logical_structure?.unknown_reason) {
+		if (!logical?.unknown_reason) {
 		throw new ParsedOutputValidationError(
 			`Unknown block ${block.block_id} must specify unknown_reason`
 		);
@@ -217,7 +217,7 @@ function validateLogicalStructure(block: Block) {
  */
 
 function validatePhysicalLayout(block: Block, pageId: string) {
-	const layout = block.physical_layout;
+	const layout = block.physical;
 	if (!layout) return;
 
 	if (layout.page_number < 1) {
@@ -323,7 +323,7 @@ function validateTableContent(content: TableContent, blockId: string) {
  * ============================================================
  */
 
-function validateDiagnostics(doc: ParsedDocument) {
+function validateDiagnostics(doc: CanonicalParsedDocument) {
     const d = doc.parse_diagnostics;
 
     if (!d) {

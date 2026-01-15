@@ -5,7 +5,7 @@ export interface RuntimeSourceState {
 }
 
 export interface RuntimeParsingState {
-    parsedDocument?: unknown;
+    CanonicalParsedDocument?: unknown;
 }
 
 export interface RuntimeClassificationState {

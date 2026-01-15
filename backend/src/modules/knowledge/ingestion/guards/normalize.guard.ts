@@ -6,7 +6,7 @@ export class NormalizeGuard implements RuntimeGuard {
     readonly step = 'normalize';
 
     check(execution: IngestionExecution): GuardResult {
-        if (!execution.runtime.parsing.parsedDocument) {
+        if (!execution.runtime.parsing.CanonicalParsedDocument) {
             return {
                 allowed: false,
                 reason: 'Cannot normalize before parsing',

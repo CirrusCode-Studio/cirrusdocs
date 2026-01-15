@@ -6,7 +6,7 @@ export class ParsingQualityGate implements QualityGate {
     name = 'PARSING_QUALITY';
 
     evaluate({ runtime }: IngestionExecution): QualityGateResult {
-        const parsed = runtime.parsing.parsedDocument;
+        const parsed = runtime.parsing.CanonicalParsedDocument;
 
         const textLength = (parsed as any)?.text?.length ?? 0;
 

@@ -1,5 +1,4 @@
 import { GuardRegistry } from "./guards/guard-registry";
-import { IngestionContext } from "./ingestion-context";
 import { IngestionExecution } from "./ingestion-execution";
 import { PipelineRegistry } from "./pipeline-registry";
 

@@ -6,12 +6,12 @@ export class ChunkGuard implements RuntimeGuard {
     readonly step = 'chunk';
 
     check(execution: IngestionExecution): GuardResult {
-        const doc = execution.runtime.parsing.parsedDocument;
+        const doc = execution.runtime.parsing.CanonicalParsedDocument;
 
         if (!doc) {
             return {
                 allowed: false,
-                reason: 'ParsedDocument mssing',
+                reason: 'CanonicalParsedDocument mssing',
                 severity: 'error',
             }
         }

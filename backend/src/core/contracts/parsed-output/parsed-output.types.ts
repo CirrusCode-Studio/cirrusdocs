@@ -1,3 +1,4 @@
+import { Strategy } from 'passport-jwt';
 /**
  * Parsed Output Contract
  * Versioned, parser-agnostic, lossless-first
@@ -12,7 +13,7 @@
  * - Lossless first, reduce later
  */
 
-export interface ParsedDocument {
+export interface CanonicalParsedDocument {
     contract_version: '1.0';
     parser: ParserInfo;
     document_metadata: DocumentMetadata;
@@ -23,64 +24,89 @@ export interface ParsedDocument {
 export interface ParserInfo {
     name: string;
     version: string;
+    strategy: "single" | "hybrid";
     execution_id?: string;
+    engines_used: string[];
 }
 
 export interface DocumentMetadata {
     document_id: string;     
     title?: string;
-    author?: string;
     language?: string;
-    source?: string;         
+    author?: string;
+    source?: {
+        file_name?: string;
+        mime_type?: string;
+        file_size_bytes?: number;
+    }       
+    page_count: number;
     created_at?: string;
 }
 
 export interface Page {
     page_id: string;
     page_number: number;
-    blocks: Block[];
     page_metadata: PageMetadata;
+    blocks: Block[];
 }
 
 export interface PageMetadata {
     layout_complexity: 'simple' | 'multi_column' | 'mixed' | 'unknown';
     ocr_used: boolean;
+    has_table: boolean;
+    has_image: boolean;
     confidence?: number;
 }
 
 export interface Block {
     block_id: string;      // stable, never re-generated
     block_type: BlockType;
-    logical_structure: LogicalStructure;
-    physical_layout?: PhysicalLayout;
+    logical: LogicalMetadata;
+    physical?: PhysicalMetadata;
     order: BlockOrder;
     content: BlockContent;
     confidence?: number;   // 0–1
     parser_source?: string; // optional hint
+    provenance: Provenance;
 }
 
+export interface Provenance {
+    source_engine: string;
+    extraction_confidence?: number;
+
+    warning?: string[];
+
+    unknown_reason?: string;
+}
 export type BlockType =
     | 'heading'
     | 'paragraph'
     | 'list'
     | 'table'
     | 'figure'
+    | 'formula'
     | 'code'
     | 'header'
     | 'footer'
     | 'unknown';
 
-export interface LogicalStructure {
+export interface LogicalMetadata {
+    order: {
+        global_index: number;
+        page_index: number;
+    }
+
     heading_level?: number; // only if type=heading
     parent_block_id?: string; // hierarchy reference
     section_path?: string[]; // e.g. ["Chapter 1", "Section 2"]
+    reading_role?: "main" | "sidebar" | "caption";
     unknown_reason?: 'ambiguous_layout' | 'low_confidence' | 'parser_failure';
 }
 
-export interface PhysicalLayout {
+export interface PhysicalMetadata {
     page_number: number;
     bbox?: BoundingBox;
-    column?: number;
+    column_index?: number;
     reading_order_confidence?: number; // 0–1
 }
 
@@ -101,12 +127,15 @@ export type BlockContent =
     | TextContent
     | ListContent
     | TableContent
+    | FigureContent
+    | FormulaContent
     | CodeContent
     | EmptyContent;
 
 export interface TextContent {
     type: 'text';
     text: string;
+    normalized?: boolean;
 }
 
 export interface ListContent {
@@ -118,10 +147,31 @@ export interface TableContent {
     type: 'table';
 
     headers?: TableRow[];
-
     rows: TableRow[];
 
+    shape: {
+        rows: number;
+        columns: number;
+    }
     confidence?: number;
+}
+
+export interface FigureContent {
+    image_ref?: string;
+    caption?: string;
+
+    ocr_text?: {
+        text: string;
+        confidence: number;
+    }
+}
+
+export interface FormulaContent {
+    latex?: string;
+    mathml?: string;
+    text_fallback?: string;
+
+    confidence: number;
 }
 
 export interface TableRow {
@@ -162,11 +212,13 @@ export interface ParseDiagnostics {
         confidence: number;
     };
 
-    layout_complexity: 'low' | 'medium' | 'high';
+    formula_detection?: {
+        detected: number;
+        confidence: number;
+    };
+
+    layout_complexity: 'low' | 'medium' | 'high' | 'unknown';
 
     warnings: string[];
-
     errors: string[];
 }
-
-

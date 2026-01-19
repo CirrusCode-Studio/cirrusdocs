@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+pymupdf
+python-multipart
+camelot-py[cv]
+opencv-python
+ghostscript
+pytesseract
+Pillow

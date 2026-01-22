@@ -1,4 +1,4 @@
-import { EvaluationInput } from './../../contracts/evaluation/evaluation-input.contract';
+import { EvaluationInput } from '../../contracts/evaluation/evaluation-input.contract';
 
 export class EvaluationInputValidator {
     static validate(input: EvaluationInput): void {

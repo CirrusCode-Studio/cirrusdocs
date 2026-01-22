@@ -1,5 +1,5 @@
 // import { RetrievalRequest } from '@/core/contracts/retrieval';
-import { RetrievalRequest } from 'src/core/contracts/retrievals/retrieval-request.contract';
+import { RetrievalRequest } from '@/core/contracts/retrievals/retrieval-request.contract';
 export interface RerankPolicyContext {
     latencyBudgetMs: number;
     rerankEnabled: boolean;

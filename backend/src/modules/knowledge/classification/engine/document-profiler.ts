@@ -1,38 +1,41 @@
-// engine/document-profiler.ts
+import { DetectorRegistry, DetectionHint } from './../detector/detector-registry';
+import { StructuralSignalExtractor } from '../extractors/structural-signal.extractor';
 import { RuleEngine } from './rule-engine';
+import { DeterministicSignalExtractor } from '../extractors/deterministic-signal.extractor';
 
 export class DocumentProfiler {
     constructor(
+        private readonly detectorRegistry: DetectorRegistry,
+        private readonly deterministicExtractor: DeterministicSignalExtractor,
+        private readonly structuralExtractor: StructuralSignalExtractor,
         private readonly ruleEngine: RuleEngine,
     ) {}
 
-    profile(docId, signals) {
-        const matchedRules = this.ruleEngine.evaluate(signals);
-
-        if (!matchedRules.length) {
-        return {
-            docId,
-            content_category: 'textual',
-            structure_confidence: 'low',
-            layout_complexity: 'simple',
-            ocr_required: 'no',
-            table_density: 'low',
-            preferred_pipeline: 'GENERIC_PIPELINE',
-            confidence: 0.4,
-            signals,
-            matched_rules: [],
-        };
+    async profile(input: {
+        docId: string;
+        file: Buffer;
+        hint?: {
+            mimeType?: string;
+            extension?: string;
         }
+    }) {
+        const rawMeta = await this.detectorRegistry.detect(
+            input.file,
+            input.hint
+        );
 
-        const topRule = matchedRules[0];
-        const profile = topRule.produce(signals);
+        const deterministic = this.deterministicExtractor.extract(rawMeta);
 
-        return {
-            docId,
-            ...profile,
-            confidence: topRule.confidence,
-            signals,
-            matched_rules: matchedRules.map(r => r.id),
-        };
+        const structural =
+            this.structuralExtractor.extract(
+                input.file, {
+                    mimeType: deterministic.mimeType,
+                    extendsion: deterministic.fileExtension,
+                    pageCount: deterministic.pageCount,
+                });
+
+        const signals = { deterministic, structural };
+
+        return this.ruleEngine.evaluate(input.docId, signals);
     }
 }

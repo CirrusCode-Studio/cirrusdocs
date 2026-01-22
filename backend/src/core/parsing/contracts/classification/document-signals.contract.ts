@@ -12,6 +12,11 @@ export interface DocumentSignals {
         headingCount: number;
         tableCount: number;
         fontVariance: number;
+        avgTextDensity: number;
+        scannedPageRatio: number;
+        structuredLayoutRatio: number; 
+        hasComplexFormatting: boolean;
+        likelyScanned: boolean;
     };
 
     llm?: {

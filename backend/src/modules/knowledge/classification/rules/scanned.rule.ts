@@ -1,23 +1,23 @@
 import { ClassificationRule } from './rule.interface';
 
-export class ScannedDocumentRule implements ClassificationRule {
-    id = 'SCANNED_DOC_RULE';
-    priority = 100;
-    confidence = 0.9;
+export class ScannedRule implements ClassificationRule {
+    name = 'scanned-rule';
+    weight = 0.9;
 
     match(signals) {
-        return (
-            signals.structural.imageOnlyPageRatio > 0.6 &&
-            signals.structural.avgTextPerPage < 3
-        );
+        return signals.structural.likelyScanned === true;
     }
 
-    produce() {
+    apply() {
         return {
             content_category: 'scanned',
             ocr_required: 'yes',
-            layout_complexity: 'complex',
-            preferred_pipeline: 'OCR_PIPELINE',
+            processing_intent: {
+                requires_ocr: true,
+                preserve_tables: false,
+                prefer_layout: 'positional',
+                chunk_strategy_hint: 'page',
+            },
         };
     }
 }

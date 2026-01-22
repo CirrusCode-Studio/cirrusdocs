@@ -1,12 +1,15 @@
-import { DocumentSignals } from '@/core/contracts/classification/document-signals.contract';
-
 export class DeterministicSignalExtractor {
-    extract(file): DocumentSignals['deterministic'] {
+    extract(meta: {
+        mimeType: string;
+        extension: string;
+        fileSizeMB: number;
+        pageCount?: number;
+    }) {
         return {
-            mimeType: file.mimeType,
-            fileExtension: file.extension,
-            fileSizeMB: file.size / (1024 * 1024),
-            pageCount: file.pageCount,
+            mimeType: meta.mimeType,
+            fileExtension: meta.extension,
+            fileSizeMB: meta.fileSizeMB,
+            pageCount: meta.pageCount ?? 0, // normalize
         };
     }
 }

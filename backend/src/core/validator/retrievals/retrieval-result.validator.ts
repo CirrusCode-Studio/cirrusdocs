@@ -1,5 +1,5 @@
 // import { RetrievalResult } from '@/core/contracts/retrieval';
-import { RetrievalResult } from 'src/core/contracts/retrievals/retrieval-result.contract';
+import { RetrievalResult } from '@/core/contracts/retrievals/retrieval-result.contract';
 export class RetrievalResultValidator {
     static validate(result: RetrievalResult): void {
         if (!result) {

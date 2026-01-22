@@ -1,4 +1,4 @@
-import { RetrievalRequest } from "src/core/contracts/retrievals/retrieval-request.contract";
+import { RetrievalRequest } from "@/core/contracts/retrievals/retrieval-request.contract";
 
 export class TopKGuard {
     static readonly MAX_TOP_K = 50;

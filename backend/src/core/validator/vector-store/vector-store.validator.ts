@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { VectorRecord } from 'src/core/contracts/vector-store/vector-record.contract';
+import { VectorRecord } from '@/core/contracts/vector-store/vector-record.contract';
 
 export class VectorStoreValidator {
     static validate(record: VectorRecord): void {

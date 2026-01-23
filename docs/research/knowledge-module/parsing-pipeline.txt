@@ -1,0 +1,23 @@
+					PARSING PIPELINE 
+					
+- ParsingEngine execute all pipeline 
+- Sub Step: 
+	+ parser
+	+ fusion
+	+ normalize
+	
+- Pipeline: 
+	PDF FILE
+	↓
+	[1] Parser Adapters (dùng thư viện)
+	  ↓
+	RawParseResult[]
+	  ↓
+	[2] Fusion Engine (merge + chọn block)
+	  ↓
+	CanonicalParsedDocument
+	  ↓
+	[3] Normalize Layer (chuẩn hóa, nhẹ)
+	  ↓
+	NormalizedParsedDocument (để downstream dùng)
+

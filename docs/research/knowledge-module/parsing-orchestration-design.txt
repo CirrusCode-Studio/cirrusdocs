@@ -1,0 +1,202 @@
+				Parsing Orchestration Design
+				
+1. Parse Orchestration là gì & không là gì
+2.Input / Output contract
+3. Core responsibilities
+4. Kiến trúc thư mục đề xuất
+5. Cách dùng DocumentProcessingProfile
+6. Luồng thực thi chi tiết
+7. Mapping classification → parser
+8. Vì sao thiết kế này cover gần như mọi behavior dữ liệu
+
+	1. Parse Orchestration là gì?
+Parse Orchestration = bộ não điều phối parsing
+- Nó:
+	KHÔNG parse
+	KHÔNG đoán
+	KHÔNG đọc raw content
+- Nó chỉ:
+	+ đọc DocumentProcessingProfile
+	+ quyết định:
+		dùng parser nào
+		thứ tự
+		fallback
+		quality gate
+		retry strategy
+📌 Nó là strategy executor
+
+	2. Input / Output
+	Input
+	interface ParseOrchestrationInput {
+	  docId: string;
+	  file: StoredDocumentRef;
+	  profile: DocumentProcessingProfile;
+	}
+
+	Output
+	interface ParseOrchestrationResult {
+	  rawBlocks: RawBlock[];
+	  metadata: {
+	    profile: DocumentProcessingProfile;
+	    usedParsers: string[];
+	    fallbackTriggered: boolean;
+	    qualityWarnings: string[];
+	  };
+	}
+
+	3. Core responsibilities (RẤT QUAN TRỌNG)
+Parse Orchestrator chịu trách nhiệm:
+	Trách nhiệm	Có
+	Chọn parser	✅
+	Quyết định OCR	✅
+	Chạy nhiều parser	✅
+	Fallback	✅
+	Retry	✅
+	Quality gate	✅
+	Explainability	✅
+Parse block	❌
+
+	4. Thư mục đề xuất
+parsing/
+├── orchestration
+│   ├── parse-orchestrator.ts
+│   ├── parse-plan.builder.ts
+│   ├── parse-plan.contract.ts
+│   ├── parse-context.ts
+│   ├── parser-selector.ts
+│   └── fallback-policy.ts
+├── engine
+│   └── parse-engine.ts
+├── profiles
+│   ├── academic.profile.ts
+│   ├── slide.profile.ts
+│   ├── scanned.profile.ts
+│   └── generic.profile.ts
+└── parsers
+    └── ...
+
+	5. ParsePlan – thứ orchestration thực sự tạo ra
+
+export interface ParsePlan {
+  profileName: string;
+
+  steps: Array<{
+    parser: BaseParser;
+    inputType: 'file' | 'blocks';
+    enabled: boolean;
+  }>;
+
+  qualityGates: QualityGate[];
+  fallback?: ParsePlan;
+}
+
+
+📌 Orchestrator build ParsePlan, engine chỉ chạy plan
+
+	6. Parse Orchestrator (trung tâm)
+export class ParseOrchestrator {
+  constructor(
+    private readonly selector: ParserSelector,
+    private readonly engine: ParseEngine,
+    private readonly fallbackPolicy: FallbackPolicy
+  ) {}
+
+  async orchestrate(input: ParseOrchestrationInput) {
+    const plan = this.selector.buildPlan(input.profile);
+
+    let result = await this.engine.execute(plan, input.file);
+
+    if (!this.engine.passesQuality(plan, result)) {
+      const fallback = this.fallbackPolicy.resolve(plan);
+      result = await this.engine.execute(fallback, input.file);
+    }
+
+    return result;
+  }
+}
+
+	7. ParserSelector – mapping classification → parsing
+export class ParserSelector {
+  buildPlan(profile: DocumentProcessingProfile): ParsePlan {
+    switch (profile.content_category) {
+      case 'academic':
+        return AcademicParseProfile(profile);
+      case 'slide':
+        return SlideParseProfile(profile);
+      case 'scanned':
+        return ScannedParseProfile(profile);
+      default:
+        return GenericParseProfile(profile);
+    }
+  }
+}
+
+
+📌 Không logic parse ở đây
+📌 Chỉ composition
+
+	8.ParseProfile (academic)
+export function AcademicParseProfile(
+  profile: DocumentProcessingProfile
+): ParsePlan {
+  return {
+    profileName: 'ACADEMIC_PARSE',
+    steps: [
+      { parser: new PdfTextParser(), inputType: 'file', enabled: true },
+      { parser: new TableParser(), inputType: 'blocks', enabled: true },
+      { parser: new FormulaParser(), inputType: 'blocks', enabled: true },
+    ],
+    qualityGates: [
+      new MissingTableGate(),
+      new TooManyUnknownGate(),
+    ],
+    fallback: GenericParseProfile(profile),
+  };
+}
+
+	9. Slide ParseProfile
+export function SlideParseProfile(profile): ParsePlan {
+  return {
+    profileName: 'SLIDE_PARSE',
+    steps: [
+      { parser: new PdfTextParser({ preferLayout: true }), enabled: true },
+      { parser: new FigureParser(), enabled: true },
+    ],
+    qualityGates: [],
+  };
+}
+
+	10. Scanned ParseProfile
+export function ScannedParseProfile(profile): ParsePlan {
+  return {
+    profileName: 'SCANNED_PARSE',
+    steps: [
+      { parser: new OcrParser(), enabled: true },
+      { parser: new TableParser(), enabled: profile.processing_intent.preserve_tables },
+    ],
+    qualityGates: [],
+  };
+}
+
+	11. ParseEngine (thực thi plan, KHÔNG suy nghĩ)
+export class ParseEngine {
+  async execute(plan: ParsePlan, file): Promise<RawBlock[]> {
+    let blocks = [];
+
+    for (const step of plan.steps) {
+      if (!step.enabled) continue;
+      blocks = await step.parser.parse(file, blocks);
+    }
+
+    return blocks;
+  }
+}
+
+	12. Vì sao kiến trúc này cover gần như toàn bộ behavior user?
+Vì:
+	Classification quyết định intent
+	ParsePlan tách khỏi code
+	Parser độc lập
+	Fallback là first-class
+	Quality gate bảo vệ
+	Override được

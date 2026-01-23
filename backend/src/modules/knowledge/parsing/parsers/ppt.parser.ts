@@ -11,11 +11,13 @@ export class PptParser implements BaseParser {
     constructor(
         private readonly client: PyComputeClient,
     ) {}
+
     supports(mime: string): boolean {
-        
+        return mime === 'application/vnd.ms-powerpoint' || 
+            mime === 'application/vnd.openxmlformats-officedocument.presentationml.presentation';    
     }
 
     async parse(input: Buffer): Promise<RawParseResult> {
-        return this
+        return this.client.post(this.api, input);
     }
 }

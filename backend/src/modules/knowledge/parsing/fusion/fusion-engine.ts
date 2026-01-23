@@ -1,5 +1,5 @@
 import { RawParseResult } from '../raw/raw-parse-result';
-import { Block } from '@/core/contracts/parsed-output';
+import { Block } from '@/core/contracts/parsing';
 
 export class FusionEngine {
     fuse(rawResults: RawParseResult[]): Block[] {

@@ -4,7 +4,7 @@ import {
 	Block,
 	BlockType,
 	TableContent,
-} from '../../contracts/parsed-output/parsed-output.types';
+} from '../../contracts/parsing/parsed-output.types';
 
 /**
  * Validation Error with context

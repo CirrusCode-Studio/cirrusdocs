@@ -1,4 +1,4 @@
-import { CanonicalParsedDocument } from "@/core/contracts/parsed-output";
+import { CanonicalParsedDocument } from "@/core/contracts/parsing";
 
 export type QualityGateStatus =
   | 'PASS'

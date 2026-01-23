@@ -1,24 +1,33 @@
 import { ClassificationRule } from "./rule.interface";
+import { DocumentSignals } from "@/core/contracts/classification/document-signals.contract";
+import { DocumentProcessingProfile } from "@/core/contracts/classification/document-processing-profile.contract";
 
 export class AcademicRule implements ClassificationRule {
-    id = 'ACADEMIC_RULE';
-    priority = 80;
-    confidence = 0.8;
+    name = "ACADEMIC_RULE";
+    weight = 0.6;
 
-    match(signals) {
+    match(signals: DocumentSignals): boolean {
         return (
-            signals.structural.headingCount > 10 &&
-            signals.structural.tableCount > 3
+        signals.structural.headingCount >= 10 &&
+        signals.structural.tableCount >= 3 &&
+        signals.structural.avgTextPerPage > 800
         );
     }
 
-    produce() {
+    apply(
+        current: Partial<DocumentProcessingProfile>
+    ): Partial<DocumentProcessingProfile> {
         return {
-            content_category: 'academic',
-            structure_confidence: 'high',
-            table_density: 'medium',
-            preferred_pipeline: 'ACADEMIC_PIPELINE',
-            fallback_pipeline: 'GENERIC_TEXT_PIPELINE',
+        ...current,
+        content_category: "academic",
+        structure_confidence: "high",
+        table_density: "medium",
+        processing_intent: {
+                ...current.processing_intent,
+                preserve_tables: true,
+                chunk_strategy_hint: "heading",
+                prefer_layout: "linear",
+            },
         };
     }
 }

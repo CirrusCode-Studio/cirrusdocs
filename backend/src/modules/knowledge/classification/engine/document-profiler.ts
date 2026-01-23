@@ -27,7 +27,7 @@ export class DocumentProfiler {
         const deterministic = this.deterministicExtractor.extract(rawMeta);
 
         const structural =
-            this.structuralExtractor.extract(
+            await this.structuralExtractor.extract(
                 input.file, {
                     mimeType: deterministic.mimeType,
                     extendsion: deterministic.fileExtension,

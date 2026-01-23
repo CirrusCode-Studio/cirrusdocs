@@ -1,5 +1,5 @@
 import { DocumentProcessingProfile } from "@/core/contracts/classification/document-processing-profile.contract";
-import { ProfileOverride } from "../classification/overrides/profile-override";
+import { ProfileOverride } from "../classification/overrides/profile-override.interface";
 
 export interface IngestionContext {
     docId: string;

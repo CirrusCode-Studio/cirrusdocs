@@ -116,9 +116,9 @@ def _process_structured_text(text_data: Dict, page_number: int, extract_metadata
             }
             
             # Detect structural elements
-            block_data["block_type"] = _classify_block_type(
-                combined_text, avg_size, sizes, flags
-            )
+            # block_data["block_type"] = _classify_block_type(
+            #     combined_text, avg_size, sizes, flags
+            # )
         
         blocks.append(block_data)
     

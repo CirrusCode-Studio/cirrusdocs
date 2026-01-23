@@ -7,7 +7,7 @@ export class FormulaFusionRule implements FusionRule {
     readonly priority = 5;
 
     supports(block: any): boolean {
-        return block.block_type === 'formula';
+        return block.block_type === 'figure';
     }
 
     apply(blocks: any[], context: FusionContext): void {

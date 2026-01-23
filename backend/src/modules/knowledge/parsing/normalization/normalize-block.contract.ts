@@ -1,4 +1,4 @@
-import { Block } from "@/core/contracts/parsed-output";
+import { Block } from "@/core/contracts/parsing";
 
 export interface NormalizedDocument {
     document_id: string;

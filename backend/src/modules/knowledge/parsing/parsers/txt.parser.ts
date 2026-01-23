@@ -2,10 +2,10 @@ import { BaseParser } from './base-parser.interface';
 import { RawParseResult } from '../raw/raw-parse-result';
 import { PyComputeClient } from '../client/py-compute-client';
 
-export class PdfTextParser implements BaseParser {
-    name = 'pdf-text';
+export class TxtParser implements BaseParser {
+    name = 'txt-parser';
     version = 'py-1.0';
-    api = '/parse/pdf-text'
+    api = '/parse/txt';
     capacity: any;
     
     constructor(
@@ -13,7 +13,7 @@ export class PdfTextParser implements BaseParser {
     ){}
 
     supports(mime: string) {    
-        return mime === 'application/pdf';
+        return mime === 'application/txt';
     }
 
     async parse(input: Buffer): Promise<RawParseResult> {

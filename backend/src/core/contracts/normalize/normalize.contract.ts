@@ -1,4 +1,4 @@
-import { CanonicalParsedDocument } from "../parsed-output";
+import { CanonicalParsedDocument } from "../parsing";
 
 export interface NormalizeInput {
     parsed_document: CanonicalParsedDocument;

@@ -1,5 +1,5 @@
 import { QualityGate, QualityGateIssue, QualityGateResult } from './quality-gate-result.contract';
-import { CanonicalParsedDocument } from '@/core/contracts/parsed-output';
+import { CanonicalParsedDocument } from '@/core/contracts/parsing';
 
 export class MissingTableGate implements QualityGate {
     readonly name = 'missing-table';

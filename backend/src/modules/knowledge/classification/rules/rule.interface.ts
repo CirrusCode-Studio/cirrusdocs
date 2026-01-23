@@ -1,13 +1,22 @@
-import { DocumentProcessingProfile } from "@/core/parsing/contracts/classification/document-processing-profile.contract";
-import { DocumentSignals } from "@/core/parsing/contracts/classification/document-signals.contract";
+import { DocumentSignals } from "@/core/contracts/classification/document-signals.contract";
+import { DocumentProcessingProfile } from "@/core/contracts/classification/document-processing-profile.contract";
 
 export interface ClassificationRule {
+    /** Unique identifier */
     name: string;
+
+    /** Relative importance when conflicts occur */
     weight: number;
 
+    /** Whether this rule applies based on signals */
     match(signals: DocumentSignals): boolean;
 
+    /** 
+     * Apply partial modifications to profile.
+     * MUST be pure & idempotent.
+     */
     apply(
-        partial: Partial<DocumentProcessingProfile>
-    ): Partial<DocumentProcessingProfile>
+        current: Partial<DocumentProcessingProfile>,
+        signals: DocumentSignals
+    ): Partial<DocumentProcessingProfile>;
 }

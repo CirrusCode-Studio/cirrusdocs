@@ -1,5 +1,5 @@
 import { QualityGate, QualityGateResult } from './quality-gate-result.contract';
-import { CanonicalParsedDocument } from '@/core/contracts/parsed-output';
+import { CanonicalParsedDocument } from '@/core/contracts/parsing';
 
 export class TooManyUnknownGate implements QualityGate {
     readonly name = 'too-many-unknown';

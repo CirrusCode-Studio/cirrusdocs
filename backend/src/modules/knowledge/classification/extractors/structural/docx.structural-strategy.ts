@@ -1,4 +1,4 @@
-import { DocumentSignals } from "@/core/parsing/contracts/classification/document-signals.contract";
+import { DocumentSignals } from "@/core/contracts/classification/document-signals.contract";
 import { StructuralStrategy } from './structural-strategy.interface';
 import * as mammoth from 'mammoth';
 import JSZip from 'jszip';

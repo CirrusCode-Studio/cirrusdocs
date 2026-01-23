@@ -16,7 +16,7 @@ export interface DocumentProcessingProfile {
 	table_density: 'low' | 'medium' | 'high';
 
 	processing_intent: {
-		requires_ocr: boolean;
+		requires_ocr?: boolean;
 		preserve_tables: boolean;
 		prefer_layout: 'linear' | 'positional';
 		chunk_strategy_hint: 'heading' | 'page' | 'block';

@@ -1,34 +1,35 @@
-import { ClassificationRule } from '../rules/rule.interface';
-import { DocumentSignals } from '@/core/parsing/contracts/classification/document-signals.contract';
-import { DocumentProcessingProfile } from '@/core/parsing/contracts/classification/document-processing-profile.contract';
+import { ClassificationRule } from "../rules/rule.interface";
+import { DocumentSignals } from "@/core/contracts/classification/document-signals.contract";
+import { DocumentProcessingProfile } from "@/core/contracts/classification/document-processing-profile.contract";
 
 export class RuleEngine {
-    constructor(private readonly rules: ClassificationRule[]) {}
+    constructor(
+        private readonly rules: ClassificationRule[]
+    ) {}
 
     evaluate(
         docId: string,
         signals: DocumentSignals
     ): DocumentProcessingProfile {
-        const matched: ClassificationRule[] = this.rules.filter(r =>
-        r.match(signals)
-        );
+        const matched = this.rules
+            .filter(r => r.match(signals))
+            .sort((a, b) => b.weight - a.weight);
 
-        let partial: Partial<DocumentProcessingProfile> = {
-        docId,
-        signals,
-        matched_rules: matched.map(r => r.name),
+        let profile: Partial<DocumentProcessingProfile> = {
+            docId,
+            signals,
+            matched_rules: [],
+            confidence: 0,
         };
 
         for (const rule of matched) {
-        partial = { ...partial, ...rule.apply(partial) };
+            profile = rule.apply(profile, signals);
+            profile.matched_rules!.push(rule.name);
+            profile.confidence! += rule.weight;
         }
 
-        return {
-        ...partial,
-        confidence: Math.min(
-            1,
-            matched.reduce((s, r) => s + r.weight, 0)
-        ),
-        } as DocumentProcessingProfile;
+        profile.confidence = Math.min(1, profile.confidence!);
+
+        return profile as DocumentProcessingProfile;
     }
 }

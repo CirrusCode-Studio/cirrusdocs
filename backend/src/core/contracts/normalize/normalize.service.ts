@@ -3,7 +3,7 @@ import {
   NormalizeOutput,
   NormalizeOptions,
 } from './normalize.contract';
-import { Block } from '../parsed-output';
+import { Block } from '../parsing';
 
 export class NormalizeService {
     normalize(input: NormalizeInput): NormalizeOutput {

@@ -1,4 +1,4 @@
-import { CanonicalParsedDocument, Block } from '@/core/contracts/parsed-output';
+import { CanonicalParsedDocument, Block } from '@/core/contracts/parsing';
 import {
   NormalizedDocument,
   NormalizedBlock,

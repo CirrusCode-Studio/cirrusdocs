@@ -1,4 +1,4 @@
-import { DocumentSignals } from "@/core/parsing/contracts/classification/document-signals.contract";
+import { DocumentSignals } from "@/core/contracts/classification/document-signals.contract";
 
 export interface StructuralStrategy {
     supports(mimeType: string, extenstion: string): boolean;

@@ -1,3 +1,4 @@
+import { ParserCapability } from '../../classification/@types/parser-capability';
 import { PyComputeClient } from './../client/py-compute-client';
 import { RawParseResult } from './../raw/raw-parse-result';
 import { BaseParser } from "./base-parser.interface";
@@ -5,7 +6,11 @@ import { BaseParser } from "./base-parser.interface";
 export class FormulaParser implements BaseParser {
     name = 'formula-parser';
     version = '1.0';
-    capacity: any;
+    capability: ParserCapability = {
+        modality: 'formula',
+        reliability: 'primary',
+        cost: 'low'
+    };
     api = '/parse/fomula';
 
     constructor(

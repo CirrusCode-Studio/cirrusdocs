@@ -16,7 +16,7 @@ export class ParseEngine {
         private readonly normalizer: NormalizeService,
     ) {}
 
-    async parse(input: ParseInput): Promise<CanonicalParsedDocument> {
+    async execute(input: ParseInput): Promise<CanonicalParsedDocument> {
         const rawResults = await this.orchestrator.run(input);
 
         const canonicalDoc = this.fusion.fuse(rawResults);

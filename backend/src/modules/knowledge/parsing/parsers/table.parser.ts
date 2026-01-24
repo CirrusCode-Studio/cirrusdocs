@@ -1,8 +1,8 @@
 import { ParserCapability } from "../../classification/@types/parser-capability";
-import { PyComputeClient } from "../client/py-compute-client";
 import { ParseExecutionContext } from "../engine/parse-execution-context";
 import { RawParseResult } from "../raw/raw-parse-result";
 import { BaseParser } from "./base-parser.interface";
+import { DocumentProcessingProfile } from "@/core/contracts/classification/document-processing-profile.contract";
 
 export class TableParser implements BaseParser {
     name = 'table-parser';
@@ -14,15 +14,34 @@ export class TableParser implements BaseParser {
     };
     api = '/parse/tables';
 
-    supports(mime: string): boolean {
-        return mime === 'application/table';
+    supports(profile: DocumentProcessingProfile): boolean {
+        const s = profile.signals.structural;
+
+        if (s.tableCount > 0) return true;
+
+        if (
+            s.structuredLayoutRatio > 0.4 &&
+            s.hasComplexFormatting
+        ) return true;
+
+        if (
+            profile.processing_intent.preserve_tables &&
+            profile.table_density !== 'low'
+        ) return true;
+
+        return false;
     }
+
 
     async parse(
         input: Buffer,
         ctx: ParseExecutionContext
     ): Promise<RawParseResult> {
-         return ctx.pyClient.post(this.api, input);
+        ctx.logger?.debug(`[PARSER][Table] parsing tables`, {
+            traceId: ctx.traceId,
+        });
+
+        return ctx.pyClient.post(this.api, input);
     }
 }
 

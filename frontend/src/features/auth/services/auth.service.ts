@@ -6,6 +6,10 @@ type AuthPayload = {
 }
 
 export const authService = {
+    register(payload: AuthPayload) {
+        return api.post('/auth/register', payload);
+    },
+    
     login(payload: AuthPayload) {
         return api.post('/auth/login', payload);
     },

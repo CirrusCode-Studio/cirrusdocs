@@ -9,9 +9,32 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
     const token = useAuthStore.getState().accessToken;
     if (token && config.headers) {
-        config.headers['Authorization'] = `Bearer ${token}`;
+        config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
 });
 
+api.interceptors.response.use(
+    res => res,
+    async (err) => {
+        if (err.response?.status === 401) {
+            try {
+                const res = await api.post('/auth/refresh',
+                    {}, 
+                    { withCredentials: true });
+
+                const { accessToken } = res.data;
+                useAuthStore.getState().setAccessToken(accessToken);
+                    
+                err.config.headers.Authorization = `Bearer ${accessToken}`;
+                return api.request(err.config);
+            } catch {
+                useAuthStore.getState().logout();
+                window.location.href = '/';
+            }
+        }
+
+        return Promise.reject(err);
+    }
+)
 export default api;

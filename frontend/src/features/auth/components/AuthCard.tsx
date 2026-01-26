@@ -6,11 +6,9 @@ import SignUpForm from './SignUpForm';
 import SocialButton from './ui/SocialButton';
 import { usePathname, useRouter } from 'next/navigation';
 
-
-
 const AuthCard= () => {
-    const pathname = usePathname()
-    const router = useRouter()
+    const pathname = usePathname();
+    const router = useRouter();
 
     const isLogin = pathname === '/sign-in' 
 

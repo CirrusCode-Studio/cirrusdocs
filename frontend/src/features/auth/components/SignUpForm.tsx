@@ -44,7 +44,7 @@ const SignUpForm = () => {
             disabled={isSubmitting}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
-            className="relative w-full mt-2 group overflow-hidden touch-manipulation"
+            className="relative w-full mt-2 group overflow-hidden touch-manipulation rounded-xl"
         >
             <div className="absolute inset-0 bg-linear-to-r from-blue-600 to-indigo-600 transition-all duration-300 group-hover:opacity-90" />
             <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />

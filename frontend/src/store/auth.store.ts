@@ -1,34 +1,31 @@
-import { persist } from "zustand/middleware";
-import { create } from "zustand";
+import { create } from 'zustand'
 
 type AuthState = {
-    accessToken: string | null;
-    refreshToken: string | null;
-    isAuthenticated: boolean;
-
-    setToken: (accessToken: string, refreshToken: string) => void;
-    logout: () => void;
+  accessToken: string | null
+  isAuthenticated: boolean
+  isHydrated?: boolean
+  setAccessToken: (token: string | null) => void
+  logout: () => void
+  markHydrated: () => void
 }
 
-export const useAuthStore = create<AuthState>()(
-    persist(
-        (set) => ({
-            accessToken: null,
-            refreshToken: null,
-            isAuthenticated: false,
-
-            setToken: (accessToken, refreshToken) => set(() => ({
-                accessToken,
-                refreshToken,
-                isAuthenticated: true,
-            })),
-
-            logout: () => set(() => ({
-                accessToken: null,
-                refreshToken: null,
-                isAuthenticated: false,
-            })),
+export const useAuthStore = create<AuthState>((set) => ({
+    accessToken: null,
+    isAuthenticated: false,
+    isHydrated: false,
+    setAccessToken: (token) =>
+        set({
+            accessToken: token,
+            isAuthenticated: !!token,
         }),
-        { name: 'auth-store'}
-    )
-);
+
+    logout: () =>
+        set({
+            accessToken: null,
+            isAuthenticated: false,
+        }),
+    markHydrated: () =>
+        set({
+            isHydrated: true,
+        }),
+}))

@@ -3,13 +3,36 @@ import { authService } from "../services/auth.service";
 import { useMutation } from "@tanstack/react-query";
 
 export const useLogin = () => {
-    const setTokens = useAuthStore((s) => s.setToken);
+    const setAccessToken = useAuthStore((s) => s.setAccessToken);
 
     return useMutation({
         mutationFn: authService.login,
         onSuccess: (res) => {
-            const { accessToken, refreshToken} = res.data;
-            setTokens(accessToken, refreshToken);
+            const { accessToken } = res.data;
+            setAccessToken(accessToken);
+        }
+    })
+}
+
+export const useRegister = () => {
+    const setTokens = useAuthStore((s) => s.setAccessToken);
+
+    return useMutation({
+        mutationFn: authService.register,
+        onSuccess: (res) => {
+            const { accessToken } = res.data;
+            setTokens(accessToken);
+        }
+    })
+}
+
+export const useLogout = () => {
+    const logout = useAuthStore((s) => s.logout);
+
+    return useMutation({
+        mutationFn: authService.logout,
+        onSettled: () => {
+            logout();
         }
     })
 }

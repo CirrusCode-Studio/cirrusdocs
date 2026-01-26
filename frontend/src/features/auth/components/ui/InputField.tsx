@@ -6,11 +6,13 @@ interface InputFieldProps {
   type: string;
   placeholder: string;
   label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   icon?: LucideIcon;
   error?: boolean;
 }
 
-const InputField = ({ type, placeholder, label, icon: Icon, error }: InputFieldProps) => {
+const InputField = ({ type, placeholder, label, value, onChange, icon: Icon, error }: InputFieldProps) => {
     const [showPassword, setShowPassword] = useState(false);
     const isPassword = type === 'password';
     const inputType = isPassword ? (showPassword ? 'text' : 'password') : type;
@@ -29,6 +31,8 @@ const InputField = ({ type, placeholder, label, icon: Icon, error }: InputFieldP
             <input
             type={inputType}
             placeholder={placeholder}
+            value={value}
+            onChange={onChange}
             className={`
                 w-full bg-slate-900/50 border ${error ? 'border-red-500/50' : 'border-white/10'} 
                 rounded-xl py-3 sm:py-2.5 ${Icon ? 'pl-11' : 'pl-4'} pr-11 

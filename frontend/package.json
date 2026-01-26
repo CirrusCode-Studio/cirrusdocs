@@ -11,6 +11,8 @@
   "dependencies": {
     "@google/genai": "^1.34.0",
     "@next/env": "^16.1.0",
+    "@tanstack/react-query": "^5.90.20",
+    "axios": "^1.13.3",
     "framer-motion": "^12.23.26",
     "lucide-react": "^0.562.0",
     "next": "16.1.0",

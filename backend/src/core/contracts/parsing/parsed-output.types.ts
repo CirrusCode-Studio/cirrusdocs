@@ -61,23 +61,21 @@ export interface PageMetadata {
 export interface Block {
     block_id: string;      // stable, never re-generated
     block_type: BlockType;
+    order: BlockOrder;
     logical: LogicalMetadata;
     physical?: PhysicalMetadata;
-    order: BlockOrder;
     content: BlockContent;
     confidence?: number;   // 0–1
-    parser_source?: string; // optional hint
     provenance: Provenance;
 }
 
 export interface Provenance {
     source_engine: string;
     extraction_confidence?: number;
-
     warning?: string[];
-
     unknown_reason?: string;
 }
+
 export type BlockType =
     | 'heading'
     | 'paragraph'
@@ -91,11 +89,6 @@ export type BlockType =
     | 'unknown';
 
 export interface LogicalMetadata {
-    order: {
-        global_index: number;
-        page_index: number;
-    }
-
     heading_level?: number; // only if type=heading
     parent_block_id?: string; // hierarchy reference
     section_path?: string[]; // e.g. ["Chapter 1", "Section 2"]
@@ -124,24 +117,13 @@ export interface BlockOrder {
 }
 
 export type BlockContent =
-    | TextContent
-    | ListContent
+    | { text: string; normalized?: boolean }
+    | { items: string[] }
     | TableContent
     | FigureContent
     | FormulaContent
-    | CodeContent
-    | EmptyContent;
-
-export interface TextContent {
-    type: 'text';
-    text: string;
-    normalized?: boolean;
-}
-
-export interface ListContent {
-    type: 'list';
-    items: string[];
-}
+    | { code: string; language?: string }
+    | {};
 
 export interface TableContent {
     type: 'table';
@@ -186,16 +168,6 @@ export interface TableCell {
     confidence?: number;
 }
 
-export interface CodeContent {
-    type: 'code';
-    code: string;
-    language?: string;
-}
-
-export interface EmptyContent {
-    type: 'empty';
-}
-
 export interface ParseDiagnostics {
     overall_confidence: number; // 0–1
 
@@ -203,11 +175,9 @@ export interface ParseDiagnostics {
 
     text_coverage: {
         detected_ratio: number;
-        missing_ratio: number;
     };
 
     table_detection: {
-        expected?: number;
         detected: number;
         confidence: number;
     };

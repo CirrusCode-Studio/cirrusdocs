@@ -1,7 +1,13 @@
 import { RawBlock } from './raw-block';
 
 export interface RawParseResult {
-    engine: string;
+    engines_used: {
+    name: string;
+    version?: string;
+    vendor?: 'python' | 'native' | 'external';
+    }[];
+
+    
     blocks: RawBlock[];
     ocr_used: boolean;
     errors?: string[];

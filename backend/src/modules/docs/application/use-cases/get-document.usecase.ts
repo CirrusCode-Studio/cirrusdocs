@@ -1,17 +1,18 @@
-import { Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { DocumentRepository } from "../../domain/repositories/document.repository";
-import { NotFoundException, ForbiddenException } from "@nestjs/common";
+import { Document } from "../../domain/entities/document.entity";
 
 @Injectable()
-export default class RetryDocUseCase {
+export default class GetDocumentUseCase {
     constructor(
         private readonly repo: DocumentRepository,
-    ){}
+    ) {}
+
     async execute(input: {
         documentId: string;
         workspaceId: string;
         requesterId: string;
-    }): Promise<void> {
+    }): Promise<Document> {
         const doc = await this.repo.findByIdScoped(
             input.documentId,
             input.workspaceId,
@@ -20,10 +21,9 @@ export default class RetryDocUseCase {
         if (!doc) 
             throw new NotFoundException('Document not found');
 
-        if (!doc.canBeRetriedBy(input.requesterId))
-            throw new ForbiddenException('Retrying document is forbidden');
+        if (!doc.canBeViewedBy(input.requesterId))
+            throw new ForbiddenException('Access to document is forbidden');
 
-        doc.markRetry();
-        await this.repo.save(doc);
+        return doc;
     }
 }

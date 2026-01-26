@@ -59,6 +59,9 @@ class Document {
         this.props.errorMessage = reason;
     }
 
+    markRetry() {
+        this.props.status = DocumentStatus.UPLOADED;
+    }
     canRetry(): boolean {
         return this.props.status === DocumentStatus.FAILED;
     }
@@ -68,6 +71,14 @@ class Document {
         this.props.deletedAt = new Date();
     }
 
+    canBeViewedBy(userId: string): boolean {
+        return this.props.ownerId === userId;
+    }
+
+    canBeRetriedBy(userId: string): boolean {
+        return this.canRetry() && this.props.ownerId === userId;
+    }
+    
     toPrimitives() {
         return {...this.props};
     }

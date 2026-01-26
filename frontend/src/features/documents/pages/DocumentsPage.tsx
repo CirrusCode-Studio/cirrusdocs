@@ -2,62 +2,45 @@
 import { useState, useMemo } from "react";
 import DocHeader from "../components/DocHeader";
 import DocTable from "../components/DocTable";
-import { useDocData } from "../hooks/use-doc-data";
-import { DocumentStatus, Document } from "../types";
+import { useDocumentData } from "../hooks/use-doc-data";
+import { useDeleteDoc } from "../hooks/use-delete-doc";
+import { useUploadDocument } from "../hooks/use-upload-doc";
 
 const DocumentsPage = () => {
-    const { documents: initialDocs = [] } = useDocData();
-    const [docs, setDocs] = useState<Document[]>(initialDocs);
+    const { data: documents = [], isLoading } = useDocumentData();
+    const uploadDoc = useUploadDocument();    
+    const deleteDoc = useDeleteDoc();
 
     const [searchQuery, setSearchQuery] = useState('');
 
     const filteredDocs = useMemo(() => {
-        return docs.filter(doc => 
+        return documents.filter(doc => 
         doc.name.toLowerCase().includes(searchQuery.toLowerCase())
         );
-    }, [docs, searchQuery]);
-
-    const handleDelete = (id: string) => {
-        setDocs(prev => prev.filter(doc => doc.id !== id));
-    };
+    }, [documents, searchQuery]);
 
     const handleChat = (id: string) => {
         console.log('Opening chat for doc:', id);
     };
 
-    const handleUpload = () => {
-        const newId = Math.random().toString(36).substr(2, 9);
-        const newDoc: Document = {
-            id: newId,
-            name: `Manual_Upload_${Math.floor(Math.random() * 100)}.pdf`,
-            type: 'pdf',
-            uploadDate: new Date().toISOString().split('T')[0],
-            status: DocumentStatus.PROCESSING,
-            isNew: true
-        };
-        
-        setDocs(prev => [newDoc, ...prev]);
+    if (isLoading) {
+        return <div>Loading documents...</div>;
+    }
 
-        setTimeout(() => {
-        setDocs(current => current.map(d => 
-            d.id === newId ? { ...d, status: DocumentStatus.READY, isNew: true } : d
-        ));
-        }, 4000);
-    };
     return (
     <div className="max-w-7xl mx-auto space-y-8">
         {/* Header Section */}
         <DocHeader
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
-            onUpload={handleUpload}
+            onUpload={(file) => uploadDoc.mutate(file)}
         />
 
         {/* Main Content Area - Scrollable */}
         <DocTable
             filteredDocs={filteredDocs}
-            handleUpload={handleUpload}
-            handleDelete={handleDelete}
+            handleUpload={() => {}}
+            handleDelete={(id: string) => deleteDoc.mutate(id)}
             handleChat={handleChat}
         />
     </div>

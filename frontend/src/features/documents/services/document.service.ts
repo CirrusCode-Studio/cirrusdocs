@@ -3,31 +3,32 @@ import { Document } from "../types";
 
 
 export const documentService = {
-    list(workspaceId: string) {
-        return api.get<Document[]>(
+    async list(workspaceId: string): Promise<Document[]> {
+        const res = await api.get<Document[]>(
             `/workspaces/${workspaceId}/documents`
         );
+        return res.data;
     },
 
-    upload(workspaceId: string, file: File) {
+    async upload(workspaceId: string, file: File) {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('workspaceId', workspaceId);
 
-        return api.post(
+        return await api.post(
             `/workspaces/${workspaceId}/documents/upload`,
             formData,
         )
     },
 
-    remove(workspaceId: string, documentId: string) {
-        return api.delete(
+    async remove(workspaceId: string, documentId: string) {
+        return await api.delete(
             `/workspaces/${workspaceId}/documents/${documentId}`
         )
     },
 
-    retry(workspaceId: string, documentId: string) {
-        return api.post(
+    async retry(workspaceId: string, documentId: string) {
+        return await api.post(
             `/workspaces/${workspaceId}/documents/${documentId}/retry`
         )
     }

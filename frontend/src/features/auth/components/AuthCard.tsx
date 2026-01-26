@@ -1,5 +1,4 @@
 'use client'
-import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Cloud, Github, Chrome } from 'lucide-react';
 import SignInForm from './SignInForm';

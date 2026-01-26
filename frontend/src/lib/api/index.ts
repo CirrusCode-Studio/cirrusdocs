@@ -1,3 +1,4 @@
+import { useAuthStore } from '@/store/auth.store';
 import axios from 'axios';
 
 const api = axios.create({
@@ -5,17 +6,12 @@ const api = axios.create({
     withCredentials: true,
 });
 
-api.interceptors.response.use(
-    res => res,
-    err => {
-        // Global error handling
-        if (err.response) {
-            console.error('API Error:', err.response.status, err.response.data);
-        } else {
-            console.error('API Error:', err.message);
-        }
-        return Promise.reject(err);
+api.interceptors.request.use((config) => {
+    const token = useAuthStore.getState().accessToken;
+    if (token && config.headers) {
+        config.headers['Authorization'] = `Bearer ${token}`;
     }
-)
+    return config;
+});
 
 export default api;

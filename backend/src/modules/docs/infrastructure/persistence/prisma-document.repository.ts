@@ -28,6 +28,28 @@ class PrismaDocumentRepository implements DocumentRepository {
         return (doc) ? new Document(doc) : null;
     }
 
+    async findByIdScoped(id: string, workspaceId: string): Promise<Document | null> {
+        const doc = await this.prisma.documentFile.findFirst({
+            where: {
+                id: id,
+                workspaceId: workspaceId,
+            },
+        });
+        return (doc) ? new Document(doc) : null;
+    }
+    
+    async findByWorkspace( input : { workspaceId: string; requesterId: string; }): Promise<Document[]> {
+        const records = await this.prisma.documentFile.findMany({
+            where: {
+                workspaceId: input.workspaceId,
+                deletedAt: null,
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        return records.map(record => new Document(record));
+    }
+    
     async softDelete(id: string, deletedAt: Date): Promise<void> {
         await this.prisma.documentFile.update({
             where: { id },
@@ -36,6 +58,17 @@ class PrismaDocumentRepository implements DocumentRepository {
                 deletedAt,
             },
         });
+    }
+
+    async listByWorkspace({ workspaceId, requesterId }: { workspaceId: string; requesterId: string }): Promise<Document[]> {
+        const docs = await this.prisma.documentFile.findMany({
+            where: {
+                workspaceId,
+                ownerId: requesterId,
+                deletedAt: null,
+            },
+        });
+        return docs.map(doc => new Document(doc));
     }
 }
 

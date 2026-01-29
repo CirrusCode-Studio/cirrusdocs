@@ -27,7 +27,7 @@ cirrusdocs-ai/
 ├── infra/ # Infrastructure and deployment configurations
 ├── docs/ # Technical documentation
 └── README.md
-
+```
 
 ## 🛠️ Tech Stack
 

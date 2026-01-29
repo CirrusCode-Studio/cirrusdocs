@@ -1,70 +1,80 @@
 # CirrusDocs AI
 
-CirrusDocs AI is a document parsing and processing system designed to extract,
-analyze, and structure data from various document formats such as PDF and DOCX.
-The project focuses on building a modular and extensible backend pipeline that
-can be integrated into real-world software systems.
+CirrusDocs AI is a document processing and analysis system designed to extract,
+structure, and manage data from various document formats. The project focuses on
+building a scalable backend architecture that supports document parsing,
+storage, and further AI-assisted processing.
 
 ## 🚀 Features
 
-- Parse and process PDF and DOCX documents
-- Modular parsing pipeline (detection, extraction, validation)
-- Structured output for downstream processing
-- Error handling and logging during document parsing
-- Designed for extensibility with AI/ML-based enhancements
+- Upload and manage documents
+- Parse and extract structured data from documents
+- Modular parsing service for extensibility
+- Metadata storage and document management
+- Designed for AI-assisted document analysis in future stages
 
-## 🧠 Motivation
+## 🧱 System Architecture
 
-This project was built to explore real-world challenges in document processing,
-including handling unstructured data, designing scalable parsing workflows,
-and applying clean software architecture principles. It also serves as a
-hands-on learning project for backend development and AI-assisted document analysis.
+The system is designed with a modular, service-oriented structure to separate
+core business logic, parsing services, and infrastructure components.
 
-## 🛠️ Tech Stack
-
-- **Backend**: Python, FastAPI
-- **Document Processing**: PDF/DOCX parsing libraries
-- **AI/ML (basic)**: OCR / text extraction concepts
-- **Database**: (Optional / configurable)
-- **Tools**: Git, GitHub
-
-## 📂 Project Structure
-
+```text
 cirrusdocs-ai/
-├── core/ # Core parsing logic and domain contracts
-├── parsers/ # Document parsers (PDF, DOCX, etc.)
-├── extractors/ # Text and structure extraction modules
-├── api/ # FastAPI routes and controllers
-├── services/ # Application services
-├── tests/ # Unit and integration tests
+├── ai-core/ # AI-related logic and domain experiments
+├── backend/ # Main backend service (NestJS)
+├── py-parsing-service/ # Python-based document parsing service
+├── frontend/ # Frontend application
+├── infra/ # Infrastructure and deployment configurations
+├── docs/ # Technical documentation
 └── README.md
 
 
+## 🛠️ Tech Stack
+
+### Backend
+- **Framework**: NestJS
+- **Database**: PostgreSQL
+- **Cache / Queue**: Redis
+- **Object Storage**: MinIO
+- **API**: RESTful APIs
+
+### Parsing Service
+- **Language**: Python
+- **Purpose**: Document parsing and extraction
+
+### Frontend
+- **Framework**: React (if applicable)
+
+### Infrastructure
+- Docker / Docker Compose
+- Environment-based configuration
+
 ## ⚙️ How It Works
 
-1. Detect document type and basic metadata
-2. Apply the corresponding parser
-3. Extract textual and structural content
-4. Validate and normalize extracted data
-5. Return structured output for further usage
+1. Documents are uploaded through the backend service.
+2. Files are stored in MinIO object storage.
+3. Metadata and processing status are stored in PostgreSQL.
+4. Parsing tasks are delegated to the Python parsing service.
+5. Extracted data is returned and managed by the backend system.
 
 ## 📌 Current Status
 
-- Core parsing pipeline implemented
-- Support for basic document formats
-- Ongoing improvements for accuracy and performance
+- Core backend architecture implemented
+- Document upload and storage flow completed
+- Parsing service integration in progress
+- Basic caching and task coordination using Redis
 
 ## 🔮 Future Improvements
 
-- Integrate AI models for smarter content understanding
-- Improve OCR accuracy for scanned documents
-- Add more document format support
-- Enhance testing and validation layers
+- Improve AI-based content understanding
+- Add support for more document formats
+- Optimize parsing performance and scalability
+- Enhance monitoring and error handling
 
 ## 👨‍💻 Author
 
 **Tuan Kiet**  
 Recent Information Technology Graduate  
-Interested in backend development, software architecture, and AI-assisted systems
+Focused on backend development, distributed systems, and AI-assisted document processing
 
 ---

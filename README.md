@@ -43,18 +43,18 @@ cirrusdocs-ai/
 - **Purpose**: Document parsing and extraction
 
 ### Frontend
-- **Framework**: React (if applicable)
+- **Framework**: NextJS
 
 ### Infrastructure
 - Docker / Docker Compose
 - Environment-based configuration
 
-## ⚙️ How It Works
+## ⚙️ Processing Flow
 
-1. Documents are uploaded through the backend service.
+1. Documents are uploaded via the backend API.
 2. Files are stored in MinIO object storage.
-3. Metadata and processing status are stored in PostgreSQL.
-4. Parsing tasks are delegated to the Python parsing service.
+3. Document metadata and processing status are stored in PostgreSQL.
+4. Parsing requests are delegated to the Python parsing service.
 5. Extracted data is returned and managed by the backend system.
 
 ## 📌 Current Status
@@ -71,10 +71,13 @@ cirrusdocs-ai/
 - Optimize parsing performance and scalability
 - Enhance monitoring and error handling
 
-## 👨‍💻 Author
+## 👨‍💻 Ownership & Contribution
+Maintained under **CirrusCode Studio** organization.
+Primary contributor: **Tuan Kiet**.
 
+## 👤 Author
 **Tuan Kiet**  
-Recent Information Technology Graduate  
+Recent Software Technology Graduate  
 Focused on backend development, distributed systems, and AI-assisted document processing
 
 ---

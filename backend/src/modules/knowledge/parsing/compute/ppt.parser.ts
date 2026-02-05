@@ -1,7 +1,7 @@
 import { DocumentProcessingProfile } from "@/core/contracts/classification/document-processing-profile.contract";
 import { PyComputeClient } from "../client/py-compute-client";
 import { RawParseResult } from "../raw/raw-parse-result";
-import { BaseParser } from "./base-parser.interface";
+import { BaseParser } from "./base-compute.interface";
 import { ParseExecutionContext } from "../engine/parse-execution-context";
 import { ParserCapability } from "../../classification/@types/parser-capability";
 

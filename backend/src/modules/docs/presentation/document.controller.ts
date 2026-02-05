@@ -11,7 +11,7 @@ import ListDocumentUseCase from "../application/use-cases/list-documents.usecase
 import { CurrentUser } from "@/common/decorators/current-user.decorator";
 import RetryDocUseCase from "../application/use-cases/retry-doc.usecase";
 
-@Controller('documents')
+@Controller('workspaces/:workspaceId/documents')
 @UseGuards(JwtAuthGuard, RolesGuard, UserStatusGuard)
 class DocumentController {
     constructor(
@@ -21,7 +21,7 @@ class DocumentController {
         private readonly retryDocumentUseCase: RetryDocUseCase,
     ) { }
 
-    @Get('workspace/:workspaceId/documents')
+    @Get()
     async list(
         @Param('workspaceId') workspaceId: string,
         @CurrentUser() user: {id: string},
@@ -32,35 +32,36 @@ class DocumentController {
         });
     }
 
-    @Post('upload')
+    @Post()
     @UseInterceptors(FileInterceptor('file'))
     async upload(
         @UploadedFile() file: Express.Multer.File,
-        @Req() req,
-        @Body() dto: UploadDocDto,
+        @Param('workspaceId') workspaceId: string,
+        @CurrentUser() user: { id: string },
     ) {
         return this.uploadDoc.execute({
-            workspaceId: dto.workspaceId,
-            userId: req.user.id,
+            workspaceId,
+            userId: user.id,
             originalName: file.originalname,
             mimeType: file.mimetype,
             size: file.size,
             buffer: file.buffer,
-        })
-    } 
-    
-    @Delete('remove')
-    async delete(
-        @Req() req,
-        @Body() dto: DeleteDocDto,
-    ) {
-        return this.deleteDoc.execute({
-            documentId: dto.documentId,
-            userId: req.user.id
-        })
+        });
     }
 
-    @Post('/workspaces/:workspaceId/documents/:id/retry')
+    
+    @Delete('/:id')
+    async delete(
+        @Param('id') documentId: string,
+        @CurrentUser() user: { id: string },
+    ) {
+        return this.deleteDoc.execute({
+            documentId,
+            userId: user.id,
+        });
+    }
+
+    @Post('/:id/retry')
     async retry(
         @Param('workspaceId') workspaceId: string,
         @Param('id') documentId: string,

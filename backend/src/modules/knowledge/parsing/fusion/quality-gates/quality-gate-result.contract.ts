@@ -22,3 +22,4 @@ export interface QualityGate {
   readonly name: string;
   evaluate(parsed: CanonicalParsedDocument): QualityGateResult;
 }
+

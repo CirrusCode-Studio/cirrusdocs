@@ -1,36 +1,33 @@
 import { DocumentProcessingProfile } from "@/core/contracts/classification/document-processing-profile.contract";
-import { ParserCapability } from "../../classification/@types/parser-capability";
+import { PyComputeClient } from "../client/py-compute-client";
 import { RawParseResult } from "../raw/raw-parse-result";
-import { BaseParser } from "./base-parser.interface";
+import { BaseParser } from "./base-compute.interface";
 import { ParseExecutionContext } from "../engine/parse-execution-context";
+import { ParserCapability } from "../../classification/@types/parser-capability";
 
-export class MarkdownParser implements BaseParser {
-    name = 'markdown-parser';
+export class HtmlParser implements BaseParser {
+    name = 'html-parser';
     version = 'py-1.0';
-    api = 'parse/markdown';
-
+    api = 'parse/html';
     capability: ParserCapability = {
         modality: 'text',
         reliability: 'primary',
-        cost: 'low',
+        cost: 'low'
     };
-
 
     supports(profile: DocumentProcessingProfile): boolean {
         return (
-            profile.format === 'markdown' ||
-            profile.content_category === 'markdown'
+            profile.ocr_required === 'no' &&
+            profile.layout_complexity !== 'complex'
         );
     }
 
 
-    async parse(
-        input: Buffer, 
-        ctx: ParseExecutionContext): Promise<RawParseResult> {
-        
-            ctx.logger?.debug(`[PARSER][Markdown] parsing markdown document`, {
+    async parse(input: Buffer, ctx: ParseExecutionContext): Promise<RawParseResult> {
+        ctx.logger?.debug(`[PARSER][HTML] parsing HTML document`, {
             traceId: ctx.traceId,
         });
+
         return ctx.pyClient.post(this.api, input);
     }
 }

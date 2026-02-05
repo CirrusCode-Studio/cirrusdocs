@@ -3,7 +3,7 @@ import { ParserCapability } from "../../classification/@types/parser-capability"
 import { PyComputeClient } from "../client/py-compute-client";
 import { ParseExecutionContext } from "../engine/parse-execution-context";
 import { RawParseResult } from "../raw/raw-parse-result";
-import { BaseParser } from "./base-parser.interface";
+import { BaseParser } from "./base-compute.interface";
 
 export class DocxParser implements BaseParser {
     name = 'docx-parser';

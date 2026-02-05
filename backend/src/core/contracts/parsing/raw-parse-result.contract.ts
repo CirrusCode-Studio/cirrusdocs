@@ -20,12 +20,26 @@ export interface RawBlock {
         font_size?: number;
         is_bold?: boolean;
         is_italic?: boolean;
+        num_lines?: number;
     }
-    
+
     layout_hints?: {
         estimated_lines?: number;
         reading_order_hint?: number;
     };
 
     warnings?: string[];
+}
+
+export interface RawParseResult {
+    engines_used: {
+        name: string;
+        version?: string;
+        vendor?: 'python' | 'native' | 'external';
+    }[];
+
+    
+    blocks: RawBlock[];
+    ocr_used: boolean;
+    errors?: string[];
 }

@@ -1,13 +1,15 @@
 import { DocumentProcessingProfile } from '@/core/contracts/classification/document-processing-profile.contract';
 import { RawParseResult } from '../raw/raw-parse-result';
-import { BaseParser } from './base-parser.interface';
+import { BaseParser } from './base-compute.interface';
 import { ParserCapability } from '../../classification/@types/parser-capability';
 import { ParseExecutionContext } from '../engine/parse-execution-context';
+import { RawBlock } from '../raw/raw-block';
+import { randomUUID } from 'crypto';
 
 export class TxtParser implements BaseParser {
     name = 'txt-parser';
     version = 'node-1.0';
-    api = '';
+
     capability: ParserCapability = {
         modality: 'text',
         reliability: 'primary',
@@ -29,6 +31,37 @@ export class TxtParser implements BaseParser {
             traceId: ctx.traceId,
         });
 
-        return ctx.pyClient.post(this.api, input);
+        const text = input.toString('utf-8');
+        
+        const blocks: RawBlock[] = text
+            .split(/\n{2,}/g)
+            .map((chunk) => chunk.trim())
+            .filter(Boolean)
+            .map((chunk) => ({
+                id: randomUUID(),
+
+                source_engine: this.name,   
+                page_number: 1,   
+
+                type: 'text',
+                text: chunk,
+
+                confidence: 1.0,
+
+                layout_hints: {
+                    estimated_lines: chunk.split('\n').length,
+                }
+            }));
+
+
+        return {
+            engines_used: [{
+                name: this.name,
+                version: this.version,
+                vendor: 'native',
+            }],
+            blocks,
+            ocr_used: false,
+        }
     }
 }

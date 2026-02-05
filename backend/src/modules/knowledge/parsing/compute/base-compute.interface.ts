@@ -1,13 +1,15 @@
 import { ParserCapability } from '../../classification/@types/parser-capability';
-import { ParseInput } from '../engine/parse-engine';
-import { RawParseResult } from '../raw/raw-parse-result';
+import { RawParseResult } from '@/core/contracts/parsing/raw-parse-result.contract';
 import { ParseExecutionContext } from '../engine/parse-execution-context';
 import { DocumentProcessingProfile } from '@/core/contracts/classification/document-processing-profile.contract';
 
-export interface BaseParser {
+// WARNING:
+// Parser MUST NOT infer semantic meaning.
+// Parser outputs RAW blocks only.
+export interface BaseCompute {
     readonly name: string;
     readonly version: string;
-    readonly api: string;
+    readonly api?: string;
     readonly capability: ParserCapability;
 
     supports(profile: DocumentProcessingProfile): boolean;

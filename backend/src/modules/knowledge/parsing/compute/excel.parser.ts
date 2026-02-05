@@ -1,7 +1,7 @@
 import { ParserCapability } from "../../classification/@types/parser-capability";
 import { ParseExecutionContext } from "../engine/parse-execution-context";
 import { RawParseResult } from "../raw/raw-parse-result";
-import { BaseParser } from "./base-parser.interface";
+import { BaseParser } from "./base-compute.interface";
 import { DocumentProcessingProfile } from "@/core/contracts/classification/document-processing-profile.contract";
 
 export class ExcelParser implements BaseParser {

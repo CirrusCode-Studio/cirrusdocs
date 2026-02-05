@@ -1,7 +1,7 @@
 import { DocumentProcessingProfile } from '@/core/contracts/classification/document-processing-profile.contract';
 import { ParserCapability } from "../../classification/@types/parser-capability";
 import { RawParseResult } from "../raw/raw-parse-result";
-import { BaseParser } from "./base-parser.interface";
+import { BaseParser } from "./base-compute.interface";
 import { ParseExecutionContext } from '../engine/parse-execution-context';
 
 export class JsonParser implements BaseParser {

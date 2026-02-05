@@ -1,7 +1,7 @@
 import { DocumentProcessingProfile } from "@/core/contracts/classification/document-processing-profile.contract"
 import { ParsePlan } from "@/core/contracts/parsing/parser-plan.contract"
 import { PdfTextParser } from "../parsers/pdf-text.parser";
-import { PyComputeClient } from "../client/py-compute-client";
+import { FigureParser } from "../parsers/figure.parser";
 
 const SlideParseProfile = (
     profile: DocumentProcessingProfile

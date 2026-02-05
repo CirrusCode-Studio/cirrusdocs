@@ -7,9 +7,7 @@ export class FusionRuleRegistry {
         this.rules.push(rule);
     }
 
-    getRulesForType(blockType: string): FusionRule[] {
-        return this.rules
-            .filter(r => r.blockType === blockType)
-            .sort((a, b) => a.priority - b.priority);
-    } 
+    getRules(): FusionRule[] {
+        return [...this.rules].sort((a,b) => a.priority - b.priority);
+    }
 }

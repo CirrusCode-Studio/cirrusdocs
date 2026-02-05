@@ -1,4 +1,4 @@
-import { BaseParser } from "./base-parser.interface";
+import { BaseParser } from "./base-compute.interface";
 import { ParserCapability } from "../../classification/@types/parser-capability";
 import { DocumentProcessingProfile } from "@/core/contracts/classification/document-processing-profile.contract";
 import { ParseExecutionContext } from "../engine/parse-execution-context";

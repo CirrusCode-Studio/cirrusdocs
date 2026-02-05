@@ -1,4 +1,4 @@
-import { CanonicalParsedDocument } from '../../contracts/parsing/parsed-output.types';
+import { CanonicalParsedDocument } from '../../contracts/parsing/canonical-block.contract';
 
 /**
  * Guard decision result

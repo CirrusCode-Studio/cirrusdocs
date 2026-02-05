@@ -8,7 +8,15 @@ export interface DocumentProcessingProfile {
 		| 'technical'
 		| 'academic'
 		| 'slide'
-		| 'scanned';
+		| 'scanned'
+		| 'webpage'
+		| 'structured'
+		| 'mixed'
+		| 'markdown';
+
+	format: 'pdf' | 'docx' | 'pptx' | 'xlsx' | 'html' | 'txt' | 'md' | 'markdown' | 'other';
+	
+	document_size: 'small' | 'medium' | 'large' | 'extra_large';
 
 	structure_confidence: 'high' | 'medium' | 'low';
 	layout_complexity: 'simple' | 'mixed' | 'complex';
@@ -17,8 +25,9 @@ export interface DocumentProcessingProfile {
 
 	processing_intent: {
 		requires_ocr?: boolean;
+		extract_figures?: boolean;
 		preserve_tables: boolean;
-		prefer_layout: 'linear' | 'positional';
+		prefer_layout: 'linear' | 'positional' | 'adaptive' | 'hierarchical';
 		chunk_strategy_hint: 'heading' | 'page' | 'block';
 	};
 

@@ -2,6 +2,7 @@ import { DocumentProcessingProfile } from "@/core/contracts/classification/docum
 import AcademicParseProfile from "../profiles/academic.profile";
 import SlideParseProfile from "../profiles/slide.profile";
 import ScannedParseProfile from "../profiles/scanned.profile";
+import { GenericParseProfile } from "../profiles/generic.profile";
 
 export class ParserSelector {
     buildPlan(profile: DocumentProcessingProfile) {
@@ -13,7 +14,7 @@ export class ParserSelector {
             case 'scanned':
                 return ScannedParseProfile(profile);
             default:
-                return GenericParseProfile(profile);
+                return GenericParseProfile();
         }_
     }
 }

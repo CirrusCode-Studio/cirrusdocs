@@ -3,7 +3,7 @@ import { ParserCapability } from '../../classification/@types/parser-capability'
 import { ParseExecutionContext } from '../engine/parse-execution-context';
 import { PyComputeClient } from './../client/py-compute-client';
 import { RawParseResult } from './../raw/raw-parse-result';
-import { BaseParser } from "./base-parser.interface";
+import { BaseParser } from "./base-compute.interface";
 
 export class FormulaParser implements BaseParser {
     name = 'formula-parser';

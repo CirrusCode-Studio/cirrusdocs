@@ -20,4 +20,303 @@
 	[3] Normalize Layer (chuẩn hóa, nhẹ)
 	  ↓
 	NormalizedParsedDocument (để downstream dùng)
+---
+
+# 1️⃣ High-level Flow (tổng quan)
+
+```
+        ┌─────────────┐
+        │  ParseInput │
+        │ (buffer,mime)
+        └──────┬──────┘
+               │
+               ▼
+      ┌──────────────────┐
+      │  Document        │
+      │  Classification  │
+      │  (Profile)       │
+      └──────┬───────────┘
+             │
+             ▼
+      ┌──────────────────┐
+      │  ParseOrchestrator│
+      └──────┬───────────┘
+             │
+             ▼
+      ┌──────────────────┐
+      │ ParsePlanBuilder │
+      │ (select computes)│
+      └──────┬───────────┘
+             │
+             ▼
+      ┌──────────────────┐
+      │ Execute Computes │
+      │ (PDF, OCR, etc)  │
+      └──────┬───────────┘
+             │
+             ▼
+      ┌──────────────────┐
+      │ Fusion Engine    │
+      │ (merge results) │
+      └──────┬───────────┘
+             │
+             ▼
+      ┌──────────────────┐
+      │ Normalize Service│
+      │ (canonical doc) │
+      └──────┬───────────┘
+             │
+             ▼
+      ┌──────────────────┐
+      │ CanonicalParsed  │
+      │ Document         │
+      └──────────────────┘
+```
+
+---
+
+# 2️⃣ Chi tiết từng bước (mapping với code)
+
+---
+
+## STEP 1 — Input
+
+```ts
+ParseInput {
+  buffer: Buffer
+  mime: string
+}
+```
+
+➡ **Chỉ là raw data**, chưa quyết định parse kiểu gì
+
+---
+
+## STEP 2 — Classification → DocumentProcessingProfile
+
+```
+┌──────────────────────────┐
+│ DocumentClassifier       │
+├──────────────────────────┤
+│ - content_category       │
+│ - ocr_required           │
+│ - layout_complexity      │
+│ - language_hint          │
+└──────────┬───────────────┘
+           ▼
+DocumentProcessingProfile
+```
+
+Ví dụ:
+
+```ts
+{
+  content_category: "academic",
+  ocr_required: "no",
+}
+```
+
+📌 **Profile = chiến lược xử lý**, không parse gì ở đây
+
+---
+
+## STEP 3 — Build ParseContext
+
+```ts
+ParseContext {
+  input,
+  detectedMime,
+  confidence,
+  profile,         
+  signals: {
+    scanned?: boolean
+  },
+  results: Map
+}
+```
+
+➡ Context là **trạng thái sống suốt pipeline**
+
+---
+
+## STEP 4 — ParseOrchestrator
+
+```
+┌────────────────────────────┐
+│ ParseOrchestrator          │
+├────────────────────────────┤
+│ 1. init context            │
+│ 2. build plan              │
+│ 3. execute plan            │
+│ 4. fallback (nếu cần)      │
+└──────────┬─────────────────┘
+           ▼
+```
+
+---
+
+## STEP 5 — ParsePlanBuilder (trái tim)
+
+```
+┌──────────────────────────────┐
+│ ParsePlanBuilder             │
+├──────────────────────────────┤
+│ Input:                       │
+│ - ParseContext               │
+│ - List<BaseCompute>          │
+│                              │
+│ Logic:                       │
+│ - supports(profile)          │
+│ - capability match           │
+│ - rank by reliability/cost   │
+└──────────┬───────────────────┘
+           ▼
+```
+
+### Output:
+
+```
+ParsePlan = [
+  PdfTextParser   (primary, low cost),
+  PdfLayoutParser (secondary),
+  OcrParser       (fallback)
+]
+```
+
+---
+
+## STEP 6 — Execute ParsePlan
+
+```
+FOR each ParseStep in order:
+    ├─ compute.parse(input, context)
+    │
+    ├─ save raw result to context.results
+    │
+    ├─ evaluate fallback policy
+    │
+    └─ stop or continue
+```
+
+ASCII flow:
+
+```
+┌───────────────┐
+│ PdfTextParser │
+└──────┬────────┘
+       │ success?
+       ▼
+┌───────────────┐
+│ stop or next  │◄─────────┐
+└───────────────┘          │
+                            │ fallback
+       ┌───────────────┐    │
+       │ OCR Parser    │────┘
+       └───────────────┘
+```
+
+---
+
+## STEP 7 — RawParseResult
+
+Mỗi compute trả về:
+
+```ts
+RawParseResult {
+  engine: "pdf-text",
+  blocks: RawBlock[],
+  confidence?: number
+}
+```
+
+➡ **KHÔNG semantic**
+➡ **KHÔNG normalize**
+➡ **KHÔNG merge**
+
+---
+
+## STEP 8 — Fusion Engine
+
+```
+┌──────────────────────────┐
+│ FusionEngine             │
+├──────────────────────────┤
+│ - merge blocks           │
+│ - resolve overlaps       │
+│ - confidence weighting   │
+│ - provenance tracking    │
+└──────────┬───────────────┘
+           ▼
+```
+
+Output:
+
+```ts
+CanonicalParsedDocument
+```
+
+---
+
+## STEP 9 — Normalize Service
+
+```
+┌──────────────────────────┐
+│ NormalizeService         │
+├──────────────────────────┤
+│ - unify block schema     │
+│ - fix coordinates       │
+│ - clean metadata        │
+└──────────┬───────────────┘
+           ▼
+```
+
+➡ Final output cho downstream (LLM, search, QA)
+
+---
+
+# 3️⃣ Toàn bộ pipeline gộp lại (ASCII)
+
+```
+ParseInput
+   │
+   ▼
+Classifier ──▶ DocumentProcessingProfile
+   │
+   ▼
+ParseContext
+   │
+   ▼
+ParseOrchestrator
+   │
+   ▼
+ParsePlanBuilder
+   │
+   ▼
+[ Compute 1 ] ─▶ RawResult
+   │
+   ├─ fallback?
+   │
+   ▼
+[ Compute 2 ] ─▶ RawResult
+   │
+   ▼
+FusionEngine
+   │
+   ▼
+NormalizeService
+   │
+   ▼
+CanonicalParsedDocument
+```
+
+---
+
+# 4️⃣ Insight quan trọng
+
+* **Parser / Compute = dumb worker**
+* **Profile = strategy**
+* **Context = state**
+* **PlanBuilder = brain**
+* **Fusion ≠ Parse**
+* **Normalize ≠ Semantic**
 

@@ -1,11 +1,10 @@
 import { DocumentProcessingProfile } from '@/core/contracts/classification/document-processing-profile.contract';
 import { ParserCapability } from '../../classification/@types/parser-capability';
 import { ParseExecutionContext } from '../engine/parse-execution-context';
-import { PyComputeClient } from './../client/py-compute-client';
-import { RawParseResult } from './../raw/raw-parse-result';
-import { BaseParser } from "./base-compute.interface";
+import { BaseCompute } from "./base-compute.interface";
+import { RawParseResult } from '@/core/contracts/parsing/raw-parse-result.contract';
 
-export class FormulaParser implements BaseParser {
+export class FormulaCompute implements BaseCompute {
     name = 'formula-parser';
     version = '1.0';
     capability: ParserCapability = {

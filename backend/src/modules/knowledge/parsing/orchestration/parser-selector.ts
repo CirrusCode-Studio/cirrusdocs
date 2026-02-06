@@ -5,16 +5,16 @@ import ScannedParseProfile from "../profiles/scanned.profile";
 import { GenericParseProfile } from "../profiles/generic.profile";
 
 export class ParserSelector {
-    buildPlan(profile: DocumentProcessingProfile) {
-        switch(profile.content_category) {
+    select(profile: DocumentProcessingProfile) {
+        switch (profile.content_category) {
             case 'academic':
-                return AcademicParseProfile(profile);
+                return new AcademicParseProfile(profile);
             case 'slide':
-                return SlideParseProfile(profile);
+                return new SlideParseProfile(profile);
             case 'scanned':
-                return ScannedParseProfile(profile);
+                return new ScannedParseProfile(profile);
             default:
-                return GenericParseProfile();
-        }_
+                return new GenericParseProfile(profile);
+        }
     }
 }

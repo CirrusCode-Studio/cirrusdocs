@@ -2,26 +2,31 @@ import { BoundingBox } from "@/core/contracts/parsing";
 
 export interface RawBlock {
     id: string;
-    source_engine: string;
 
-    page_number: number;
-    type:'text' | 'table' | 'figure' | 'formula' | 'image' | 'unknown'
+    // provenance
+    source: {
+        engine: string;
+        version?: string;
+    };
 
+    page: number;
+
+    // physical / structural signals ONLY
     bbox?: BoundingBox;
 
-    text?: string;
-    table_ref?: string;
-    image_ref?: string;
-    formula?: string;
+    content?: {
+        text?: string;
+        tokens?: string[];
+        binary_ref?: string; // image / table snapshot / external blob
+    };
 
-    confidence?: number;
-    metadata?: {
+    physical_metadata?: {
         font?: string;
         font_size?: number;
         is_bold?: boolean;
         is_italic?: boolean;
-        num_lines?: number;
-    }
+        line_count?: number;
+    };
 
     layout_hints?: {
         estimated_lines?: number;
@@ -38,8 +43,12 @@ export interface RawParseResult {
         vendor?: 'python' | 'native' | 'external';
     }[];
 
-    
     blocks: RawBlock[];
-    ocr_used: boolean;
+
+    signals?: {
+        ocr_used?: boolean;
+        page_count?: number;
+    };
+
     errors?: string[];
 }

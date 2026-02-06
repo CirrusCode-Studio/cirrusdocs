@@ -1,9 +1,17 @@
-import { PyComputeClient } from "../client/py-compute-client";
 import { Logger } from "@nestjs/common";
+import { PyComputeClient } from "../client/py-compute-client";
 
-export interface ParseExecutionContext {
-    pyClient: PyComputeClient;
-    logger?: Logger;
+export class ParseExecutionContext {
+    constructor(
+        readonly docId: string,
+        readonly pyClient: PyComputeClient,
+        readonly logger?: Logger,
+    ) {}
 
-    traceId?: string;
+    readonly signals: {
+        ocrUsed?: boolean;
+        fallbackTriggered?: boolean;
+    } = {};
+
+    readonly warnings?: string[] = [];
 }

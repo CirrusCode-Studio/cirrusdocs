@@ -1,15 +1,15 @@
-import { BaseParser } from "./base-compute.interface";
+import { BaseCompute } from "./base-compute.interface";
 import { ParserCapability } from "../../classification/@types/parser-capability";
 import { DocumentProcessingProfile } from "@/core/contracts/classification/document-processing-profile.contract";
 import { ParseExecutionContext } from "../engine/parse-execution-context";
-import { RawParseResult } from "../raw/raw-parse-result";
+import { RawParseResult } from "@/core/contracts/parsing/raw-parse-result.contract";
 
-export class PdfTextParser implements BaseParser {
-    name = 'pdf-text';
-    version = 'py-1.0';
-    api = '/parse/pdf-text';
+export class PdfTextCompute implements BaseCompute {
+    readonly name = 'pdf-text';
+    readonly version = 'py-1.0';
+    readonly api = '/parse/pdf-text';
 
-    capability: ParserCapability = {
+    readonly capability: ParserCapability = {
         modality: 'text',
         reliability: 'primary',
         cost: 'low',
@@ -18,22 +18,40 @@ export class PdfTextParser implements BaseParser {
     supports(profile: DocumentProcessingProfile): boolean {
         if (profile.ocr_required === 'yes') return false;
 
-        return (
-            profile.content_category === 'textual' ||
-            profile.content_category === 'academic' ||
-            profile.content_category === 'technical' ||
-            profile.content_category === 'slide'
-        );
+        return [
+            'textual',
+            'academic',
+            'technical',
+            'slide',
+        ].includes(profile.content_category);
     }
 
-    async parse(
+    async parseFromFile(
         input: Buffer,
         ctx: ParseExecutionContext
     ): Promise<RawParseResult> {
-        ctx.logger?.debug(`[PARSER][PDFText] parsing text`, {
-            traceId: ctx.traceId,
+        ctx.logger?.debug(`[COMPUTE][PDF_TEXT] start`, {
+            traceId: ctx.docId,
         });
 
-        return ctx.pyClient.post(this.api, input);
+        const result = await ctx.pyClient.post<RawParseResult>(
+            this.api,
+            input,
+        );
+
+        // 🔒 Compute layer chịu trách nhiệm provenance
+        return {
+            engines_used: [
+                ...(result.engines_used ?? []),
+                {
+                    name: this.name,
+                    version: this.version,
+                    vendor: 'python',
+                },
+            ],
+            blocks: result.blocks,
+            signals: result.signals,
+            errors: result.errors,
+        };
     }
 }

@@ -1,5 +1,6 @@
-import { RawBlock } from "@/modules/knowledge/parsing/raw/raw-block";
 import { DocumentProcessingProfile } from "../classification/document-processing-profile.contract";
+import { RawBlock } from "./raw-parse-result.contract";
+import { StoredDocumentRef } from "../storage/stored-document-ref.contract";
 
 export interface ParseOrchestrationInput {
     docId: string;
@@ -12,7 +13,7 @@ export interface ParseOrchestraionResult {
     metadata: {
         profile: DocumentProcessingProfile;
         usedParsers: string[];
-        fallbackTriggered: boolean;
-        qualityWarnings: string[];
+        fallbackTriggered?: boolean;
+        qualityWarnings?: string[];
     }
 }

@@ -1,12 +1,12 @@
+import { BaseCompute } from './base-compute.interface';
 import { DocumentProcessingProfile } from '@/core/contracts/classification/document-processing-profile.contract';
-import { RawParseResult } from '../raw/raw-parse-result';
-import { BaseParser } from './base-compute.interface';
+import { RawParseResult } from '@/core/contracts/parsing/raw-parse-result.contract';
 import { ParserCapability } from '../../classification/@types/parser-capability';
 import { ParseExecutionContext } from '../engine/parse-execution-context';
-import { RawBlock } from '../raw/raw-block';
+import { RawBlock } from '@/core/contracts/parsing/raw-parse-result.contract';
 import { randomUUID } from 'crypto';
 
-export class TxtParser implements BaseParser {
+export class TxtCompute implements BaseCompute {
     name = 'txt-parser';
     version = 'node-1.0';
 
@@ -61,7 +61,6 @@ export class TxtParser implements BaseParser {
                 vendor: 'native',
             }],
             blocks,
-            ocr_used: false,
         }
     }
 }

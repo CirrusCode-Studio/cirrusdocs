@@ -1,10 +1,10 @@
+import { BaseCompute } from './base-compute.interface';
 import { ParserCapability } from "../../classification/@types/parser-capability";
 import { ParseExecutionContext } from "../engine/parse-execution-context";
-import { RawParseResult } from "../raw/raw-parse-result";
-import { BaseParser } from "./base-compute.interface";
 import { DocumentProcessingProfile } from "@/core/contracts/classification/document-processing-profile.contract";
+import { RawParseResult } from '@/core/contracts/parsing/raw-parse-result.contract';
 
-export class TableParser implements BaseParser {
+export class TableCompute implements BaseCompute {
     name = 'table-parser';
     version = '1.0';
     capability: ParserCapability = {

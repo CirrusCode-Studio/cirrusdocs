@@ -3,6 +3,7 @@ import { ParseOrchestrator } from "./parse-orchestrator";
 import { FusionEngine } from "../fusion/fusion-engine";
 import { CanonicalParsedDocument } from "@/core/contracts/parsing";
 import { NormalizeService } from "../normalization/normalize.service";
+import { DocumentProcessingProfile } from "@/core/contracts/classification/document-processing-profile.contract";
 
 export interface ParseInput {
     buffer: Buffer;
@@ -16,13 +17,17 @@ export class ParseEngine {
         private readonly normalizer: NormalizeService,
     ) {}
 
-    async execute(input: ParseInput): Promise<CanonicalParsedDocument> {
-        const rawResults = await this.orchestrator.run(input);
+    async execute(
+        input: ParseInput,
+        profile: DocumentProcessingProfile
+    ): Promise<CanonicalParsedDocument> {
+        const rawResults = await this.orchestrator.run({
+            input, 
+            profile
+        });
 
-        const canonicalDoc = this.fusion.fuse(rawResults);
-
-        const normalizeDoc = this.normalizer.normalize(canonicalDoc);
-
-        return normalizeDoc;
+        const fused = this.fusion.fuse(rawResults);
+        
+        return this.normalizer.normalize(fused);
     }
 }

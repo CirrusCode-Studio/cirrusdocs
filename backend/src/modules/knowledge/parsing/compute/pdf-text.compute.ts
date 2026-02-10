@@ -34,7 +34,7 @@ export class PdfTextCompute implements BaseCompute {
             traceId: ctx.docId,
         });
 
-        const result = await ctx.pyClient.post<RawParseResult>(
+        const result = await ctx.pyClient.postFile<RawParseResult>(
             this.api,
             input,
         );

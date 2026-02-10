@@ -28,7 +28,7 @@ export class TxtCompute implements BaseCompute {
         ctx: ParseExecutionContext
     ): Promise<RawParseResult> {
         ctx.logger?.debug(`[PARSER][TXT] parsing plain text`, {
-            traceId: ctx.traceId,
+            traceId: ctx.docId,
         });
 
         const text = input.toString('utf-8');

@@ -38,10 +38,10 @@ export class TableCompute implements BaseCompute {
         ctx: ParseExecutionContext
     ): Promise<RawParseResult> {
         ctx.logger?.debug(`[PARSER][Table] parsing tables`, {
-            traceId: ctx.traceId,
+            traceId: ctx.docId,
         });
 
-        return ctx.pyClient.post(this.api, input);
+        return ctx.pyClient.postFile(this.api, input);
     }
 }
 

@@ -1,4 +1,4 @@
-import { RawBlock } from "../../raw/raw-block"
+import { RawBlock } from "@/core/contracts/parsing/raw-parse-result.contract";
 import { FusionBlock } from "../fusion-input.contract"
 
 export const rawToFusionBlock = (raw: RawBlock): FusionBlock => {

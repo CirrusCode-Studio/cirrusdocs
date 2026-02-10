@@ -1,6 +1,5 @@
 import {
     QualityGate,
-    QualityGateIssue,
     QualityGateResult,
 } from './quality-gate-result.contract';
 import { CanonicalParsedDocument } from '@/core/contracts/parsing';

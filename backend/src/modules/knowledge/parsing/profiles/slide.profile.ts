@@ -1,19 +1,30 @@
-import { DocumentProcessingProfile } from "@/core/contracts/classification/document-processing-profile.contract"
 import { ParsePlan } from "@/core/contracts/parsing/parser-plan.contract"
-import { PdfTextParser } from "../parsers/pdf-text.parser";
-import { FigureParser } from "../parsers/figure.parser";
+import { ParseProfileBuilder } from "./parse-profile.builder";
+import { ParseProfile } from "../engine/parse-profile";
+import { PdfTextCompute } from "../compute/pdf-text.compute";
+import { FigureCompute } from "../compute/figure.compute";
+import { GenericParseProfile } from "./generic.profile";
 
-const SlideParseProfile = (
-    profile: DocumentProcessingProfile
-): ParsePlan => {
-    return {
-        profileName: 'SLIDE_PARSE',
-        steps: [
-            { parser: new PdfTextParser(), inputType: 'file', enabled: true},
-            { parser: new FigureParser(), inputType: 'blocks', enabled: true},
-        ],
-        qualityGates: [],
-    };
-}
+class SlideParseProfile implements ParseProfileBuilder {
+    constructor(
+        private readonly mime: string) {}
+
+    build(): ParsePlan {
+            const fallback = new GenericParseProfile(
+                ParseProfile.TEXT_DOMINANT,
+                this.mime
+            ).build();
+    
+            return {
+                profileName: 'SLIDE_PARSE',
+                steps: [
+                    { compute: new PdfTextCompute(), inputType: 'file', enabled: true },
+                    { compute: new FigureCompute(), inputType: 'blocks', enabled: true}
+                ],
+                qualityGates: [],
+                fallback,
+            };
+        }
+};
 
 export default SlideParseProfile;

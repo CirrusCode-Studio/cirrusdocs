@@ -1,6 +1,6 @@
 // src/modules/knowledge/parsing/engine/parse-orchestrator.ts
 import { Logger } from "@nestjs/common";
-import { ParserSelector } from "../orchestration/parser-selector";
+import { ParserSelector } from "../selector/parser-selector";
 import { FallbackPolicy } from "../orchestration/fallback-policy";
 import { ParseExecutionContext } from "./parse-execution-context";
 import {

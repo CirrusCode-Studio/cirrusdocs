@@ -1,11 +1,11 @@
 import { CanonicalParsedDocument } from "@/core/contracts/parsing";
-import { FushionDocument } from "./fusion-input.contract";
+import { FusionDocument } from "./fusion-input.contract";
 
 export class FusionContext {
     readonly warnings: string[] = [];
 
     constructor (
-        readonly input: FushionDocument,
+        readonly input: FusionDocument,
         readonly result: CanonicalParsedDocument,
     ) {}
 

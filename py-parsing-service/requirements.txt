@@ -1,11 +1,22 @@
-fastapi
-uvicorn[standard]
+# fastapi
+# uvicorn[standard]
+# pymupdf
+# python-multipart
+# camelot-py[cv]
+# opencv-python
+# ghostscript
+# pytesseract
+# Pillow
+# paddleocr
+# pdf2image
+grpcio
+grpcio-tools
+
+requests
+
 pymupdf
-python-multipart
-camelot-py[cv]
-opencv-python
-ghostscript
-pytesseract
-Pillow
-paddleocr
-pdf2image
+python-docx
+
+pydantic
+pymupdf
+python-docx

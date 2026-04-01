@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package parser;
+
+service ParserService {
+  rpc Parse (ParseRequest) returns (ParseResponse);
+}
+
+message ParseRequest {
+  string file_url = 1;
+  repeated string tasks = 2;
+  string profile_json = 3;
+}
+
+message ParseResponse {
+  string blocks_json = 1;
+}
